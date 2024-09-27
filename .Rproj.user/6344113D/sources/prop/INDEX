@@ -1,3 +1,5 @@
+~%2FGitHub%2FMattermostR%2F.gitattributes="EB3DE953"
+~%2FGitHub%2FMattermostR%2F.gitignore="06FD0554"
 ~%2FGitHub%2FMattermostR%2FDESCRIPTION="3BBCE6B6"
 ~%2FGitHub%2FMattermostR%2FNAMESPACE="818196F6"
 ~%2FGitHub%2FMattermostR%2FR%2Fauthenticate.R="E1F13AA3"
@@ -19,6 +21,7 @@
 ~%2FGitHub%2FMattermostR%2FR%2Fmattermost_api_request.R="DB6C0150"
 ~%2FGitHub%2FMattermostR%2FR%2Fsend_mattermost_file.R="F4642503"
 ~%2FGitHub%2FMattermostR%2FR%2Fsend_message.R="87A6F5CB"
+~%2FGitHub%2FMattermostR%2FREADME.md="E408E725"
 ~%2FGitHub%2FMattermostR%2Ftests%2Ftestthat%2Ftest-check_mattermost_auth.R="7C00ABBB"
 ~%2FGitHub%2FMattermostR%2Ftests%2Ftestthat%2Ftest-create_channel.R="F5C377A0"
 ~%2FGitHub%2FMattermostR%2Ftests%2Ftestthat%2Ftest-delete_channel.R="36030189"
