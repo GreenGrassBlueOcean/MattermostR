@@ -1,0 +1,54 @@
+library(httr2)
+
+# Function to send a request to Mattermost API
+mattermost_api_request <- function(base_url, token, endpoint, method = "GET", body = NULL, verbose = FALSE) {
+  # Construct the full URL
+  url <- paste0(base_url, endpoint)
+  
+  # Create the request object
+  req <- httr2::request(url) %>%
+    httr2::req_headers(
+      Authorization = paste("Bearer", token),
+      Accept = "application/json",
+      `Content-Type` = "application/json"
+    ) %>%
+    httr2::req_method(method)
+  
+  # If there's a body, attach it to the request
+  if (!is.null(body)) {
+    req <- httr2::req_body_json(req, body)
+  }
+  
+  # Send the request and capture the response
+  response <- req |> httr2::req_perform()
+  
+  # Handle the response
+  handle_response_content(response, verbose)
+}
+
+# Handle the response content
+handle_response_content <- function(response, verbose) {
+  content_type <- httr2::resp_content_type(response)
+  
+  if (grepl("application/json", content_type)) {
+    if (verbose) {
+      message("Response Body:")
+      print(httr2::resp_body_json(response, simplifyVector = TRUE))
+    }
+    return(httr2::resp_body_json(response, simplifyVector = TRUE))
+  } else {
+    message(sprintf("Unexpected content type '%s' received.", content_type))
+    message("Response Body:")
+    print(httr2::resp_body_string(response))
+    warning("Received unexpected content type from server.")
+    return(NULL)
+  }
+}
+
+# Example usage
+base_url <- "https://yhrktf.stackhero-network.com"
+token <- "e9ow9u8e8fbeu83dehhitq6tsw"
+endpoint <- "/api/v4/system/ping"
+
+# Make the API request
+response <- mattermost_api_request(base_url, token, endpoint, verbose = TRUE)

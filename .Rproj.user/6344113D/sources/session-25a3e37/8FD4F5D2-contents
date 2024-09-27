@@ -1,0 +1,33 @@
+# File: R/get_mattermost_file.R
+
+#' Retrieve a file from Mattermost
+#'
+#' This function retrieves a file from Mattermost based on its file ID.
+#'
+#' @param file_id The ID of the file to be retrieved.
+#' @param auth A list containing `base_url` and `headers` for authentication.
+#' @return The response from the Mattermost API, which may contain the file data.
+#' @export
+#' @examples
+#' \dontrun{
+#' # Assuming you have already authenticated and obtained the file_id
+#' file_id <- "your_file_id_here"
+#' file_response <- get_mattermost_file(file_id = file_id)
+#' print(file_response)
+#'
+#' file_response <- get_mattermost_file(file_id = "i5rb43jei787jxcud7ekyyyyhc")
+#' }
+get_mattermost_file <- function(file_id, auth = authenticate_mattermost()) {
+  # Validate the input
+  if (missing(file_id) || !nzchar(file_id)) {
+    stop("Please provide a valid 'file_id'.")
+  }
+
+  # Define the endpoint for retrieving the file
+  endpoint <- paste0("/api/v4/files/", file_id)
+
+  # Send the request to get channels
+  file_data <- mattermost_api_request(auth, endpoint, method = "GET")
+
+  return(file_data)
+}

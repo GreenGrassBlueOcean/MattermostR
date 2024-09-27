@@ -1,0 +1,61 @@
+# File: R/send_message.R
+
+#' Send a text message to a Mattermost channel
+#'
+#' @param auth The authentication object created by `authenticate_mattermost()`.
+#' @param channel_id The ID of the Mattermost channel.
+#' @param message The message content.
+#' @param verbose Boolean. If `TRUE`, the function will print request/response details for more information.
+#'
+#' @return Parsed response from the Mattermost server.
+#' @export
+#' @examples
+#' \dontrun{
+#' # Define channel ID and message
+#' authenticate_mattermost()
+#' teams <- list_all_teams()
+#' team_channels <- get_team_channels(team_id = teams$id[1])
+#' channel_id <- get_channel_id_by_display_name(team_channels, "Off-Topic")
+#'
+#' message <- paste("Hello, Mattermost! This is a test message at", Sys.time())
+#'
+#' # Send the message
+#' response <- send_mattermost_message(channel_id = channel_id, message = message, verbose = TRUE)
+#' }
+send_mattermost_message <- function(auth = authenticate_mattermost(), channel_id, message, verbose = FALSE) {
+  # Check if channel_id is provided
+  if (missing(channel_id) || !nzchar(channel_id)) {
+    stop("Please provide a valid 'channel_id'.")
+  }
+
+  # Check if message is provided
+  if (missing(message) || !nzchar(message)) {
+    stop("Please provide a valid message to send.")
+  }
+
+  # Define the endpoint for sending messages
+  endpoint <- sprintf("/api/v4/posts")
+
+  # Prepare the body of the message
+  body <- list(
+    channel_id = channel_id,
+    message = message
+  )
+
+  # Set headers for the message request
+  headers <- list(
+    "Content-Type" = "application/json",
+    Accept = "application/json"
+  )
+
+  # Send the request using the mattermost_api_request function
+  response <- mattermost_api_request(
+    auth = auth,
+    endpoint = endpoint,
+    method = "POST",
+    body = body,
+    verbose = verbose
+  )
+
+  return(response)
+}

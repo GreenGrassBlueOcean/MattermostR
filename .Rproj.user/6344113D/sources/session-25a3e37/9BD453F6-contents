@@ -1,0 +1,21 @@
+# File: R/list_all_teams.R
+
+#' List all teams in Mattermost
+#'
+#' @param auth A list containing `base_url` and `headers` for authentication.
+#'
+#' @return A data frame containing details of all teams.
+#' @export
+#' @examples
+#' \dontrun{
+#' teams <- list_all_teams()
+#' }
+list_all_teams <- function(auth = authenticate_mattermost()){
+  # Define the endpoint for listing all teams
+  endpoint <- "/api/v4/teams" #/all
+
+  # Send the request to get all teams
+  teams_data <- mattermost_api_request(auth = auth, endpoint = endpoint, method = "GET")
+
+  return(teams_data)
+}

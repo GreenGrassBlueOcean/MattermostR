@@ -1,0 +1,27 @@
+# File: R/get_channel_posts.R
+
+#' Get posts from a Mattermost channel
+#'
+#' @param auth The authentication object created by `authenticate_mattermost()`.
+#' @param channel_id The Mattermost channel ID.
+#' @param retries Number of retries in case of failure. Default is 3.
+#' @param backoff Base backoff time (in seconds) between retries. Default is 1 second.
+#' @param timeout Timeout for the API request in seconds. Default is 10 seconds.
+#'
+#' @return Parsed JSON response with posts from the channel.
+#' @export
+get_channel_posts <- function(auth, channel_id, retries = 3, backoff = 1, timeout = 10) {
+  endpoint <- paste0("/api/v4/channels/", channel_id, "/posts")
+
+  # Send the request using mattermost_api_request
+  response <- mattermost_api_request(
+    auth = auth,
+    endpoint = endpoint,
+    method = "GET",
+    retries = retries,
+    backoff = backoff,
+    timeout = timeout
+  )
+
+  return(response)
+}

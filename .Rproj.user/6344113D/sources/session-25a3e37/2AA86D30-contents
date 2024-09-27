@@ -1,0 +1,49 @@
+Package: Refinitiv
+Type: Package
+Title: Connect to Datastream and python Eikon api in r
+Version: 0.1.0.9004
+Author: Laurens van der Burg
+Maintainer: Laurens van der Burg <laurens@ggbo.eu>
+Description: R interface to the Eikon Python api using reticulate and to DataStream using the DatastreamDSWS2R package. This package is in no way affiliated with Thomson Reuters,Refinitv, Eikon or Datastream. Use at own risk.
+             This package makes use of the DatastreamDSWS2R package from CharlesCara on Github for DataStream Connections.
+License: LGPL (>= 2.0, < 3) | Mozilla Public License
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    qdapRegex,
+    reticulate,
+    zoo,
+    methods,
+    DatastreamDSWS2R,
+    httr,
+    stringi,
+    rlang,
+    here,
+    rstudioapi,
+    httr2,
+    R6
+Remotes:
+    github::CharlesCara/DatastreamDSWS2R
+Config/reticulate:
+  list(
+    packages = list(
+      list(package = "eikon", pip = TRUE),
+      list(package = "refinitiv.dataplatform", pip = TRUE)
+    )
+  )
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 4.1.0)
+Suggests: 
+    testthat,
+    covr,
+    lubridate,
+    devtools,
+    countrycode,
+    dplyr,
+    archivist,
+    digest,
+    shiny,
+    websocket,
+    later,
+    mockery
