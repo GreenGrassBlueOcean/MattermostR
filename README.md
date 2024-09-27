@@ -1,139 +1,112 @@
 # MattermostR
 
-MattermostR is an R package that simplifies interactions with the [Mattermost](https://mattermost.com/) platform through its REST API. The package allows you to send messages, upload files, and manage other Mattermost features from within R.
+MattermostR is an R package designed to interact with the Mattermost API for sending messages, managing channels, uploading files, and more. The package includes functionality for automating interactions with Mattermost from R scripts, allowing you to easily send messages, upload attachments, and manage teams and channels.
 
 ## Features
 
--   **Send Messages**: Send messages to specific Mattermost channels.
--   **File Uploads**: Upload files as attachments to messages.
--   **Message Priority**: Set message priority to Normal, High, or Low (depending on Mattermost server support).
--   **Easy Authentication**: Authenticate via a token to interact with the Mattermost API.
+### 1. Send Messages with Priority
+
+Send messages to Mattermost channels with optional priorities:
+- **Normal**
+- **High**
+- **Low**
+
+The priority is automatically normalized in the `send_mattermost_message()` function, so you don't need to worry about case sensitivity (e.g., `high`, `HIGH`, and `High` are all valid).
+
+### 2. Attach Files to Messages
+
+You can attach files to your messages by specifying a file path. The file is first uploaded to the Mattermost server, and its file ID is included in the message. 
+
+Example:
+```r
+response <- send_mattermost_message(
+  channel_id = channel_id, 
+  message = "Here is your file!", 
+  file_path = "output.txt", 
+  verbose = TRUE
+)
+```
+### 3. Manage Teams and Channels
+
+The package provides tools for managing channels and teams:
+
+    List Channels and Groups: Retrieve all channels and groups from a team.
+    Create Channels: Programmatically create new channels in a team.
+    Delete Channels: Delete existing channels.
+    Look Up Channels by Name: Find a specific channel by name and get its ID.
+
+### 4. Authentication
+
+Authenticate with the Mattermost API using a bearer token or by providing your username and password. Once authenticated, the token is stored for future API calls.
+
+```r
+auth <- authenticate_mattermost(
+  base_url = "https://yourmattermost.stackhero-network.com", 
+  token = "your-token"
+)
+```
+
+### 5. Error Handling and Validation
+
+Priority Validation: Before sending a message, the priority is validated to ensure that it's one of Normal, High, or Low. If an invalid priority is provided, the function will return an error.
+Input Validation: Ensures that required fields (such as channel_id and message) are provided before making API calls.
 
 ## Installation
 
-To install MattermostR, you can clone this repository and install it using R's `devtools`:
+You can install the MattermostR package from GitHub:
 
-``` r
-# Install devtools if you don't have it
+```r
+# Install the devtools package if you don't have it already
 install.packages("devtools")
 
 # Install MattermostR
-devtools::install_github("your-username/MattermostR")
+devtools::install_github("yourusername/MattermostR")
 ```
 
-## Authentication
+## Usage
+### Sending a Message
 
-Before sending any messages or uploading files, you need to authenticate using your Mattermost API token.
+```r
+# Authenticate
+auth <- authenticate_mattermost(base_url = "https://yourmattermost.stackhero-network.com", token = "your-token")
 
-``` r
-# Authenticate with Mattermost using your API token
-auth <- authenticate_mattermost(base_url = "https://your-mattermost-server.com", token = "your-api-token")
-```
-
-## Usage Sending a Message
-
-You can send a message to a specific Mattermost channel using the send_mattermost_message function.
-
-``` r
-# Send a simple text message
+# Send a message to a channel
 response <- send_mattermost_message(
   channel_id = "your-channel-id", 
-  message = "Hello, Mattermost!"
+  message = "Hello, Mattermost!", 
+  priority = "High", 
+  verbose = TRUE
 )
 ```
 
-# Sending a Message with Priority
-
-You can set the priority of the message (if supported by your Mattermost server) to one of the following values: "Normal", "High", or "Low". The function automatically normalizes the priority string to ensure proper casing.
-
-``` r
-# Send a message with High priority
+### Sending a Message with a File
+```r
+# Send a message with a file attachment
 response <- send_mattermost_message(
   channel_id = "your-channel-id", 
-  message = "This is an important message!", 
-  priority = "High"
+  message = "Here is a file attachment", 
+  file_path = "path/to/file.txt", 
+  verbose = TRUE
 )
 ```
+### Managing Channels
+```r
+# List all channels in a team
+channels <- get_team_channels(team_id = "your-team-id")
 
-```         
-Note: There is no need to manually use the normalize_priority() function, as send_mattermost_message() already handles priority normalization automatically.
+# Create a new channel
+create_mattermost_channel(team_id = "your-team-id", channel_name = "new-channel", channel_display_name = "New Channel")
+
+# Delete a channel
+delete_mattermost_channel(channel_id = "your-channel-id")
 ```
 
-# Uploading a File with a Message
+## Roadmap
 
-You can attach a file to your message by providing the file path.
-
-``` r
-# Create a sample text file
-writeLines(c("Hello, world!"), "output.txt")
-
-# Send the file with a message
-response <- send_mattermost_message(
-  channel_id = "your-channel-id", 
-  message = "Here's an attached file!", 
-  file_path = "output.txt"
-)
-```
-
-# Normalizing and Validating Priority
-
-Although normalize_priority() is handled automatically by send_mattermost_message(), you can still call it manually if needed. This function converts different casings of priority values ("low", "LOW", "Low") into their correct format ("Low", "Normal", "High") and validates them.
-
-``` r
-# Example usage of normalize_priority
-normalize_priority("low")  # Returns "Low"
-normalize_priority("HIGH")  # Returns "High"
-normalize_priority("medium")  # Throws an error for invalid priority
-```
-
-# Handling Errors
-
-The package includes basic error handling. For example, if you try to send a message with an invalid priority, you'll get an informative error message:
-
-``` r
-# Error handling for invalid priority
-tryCatch(
-  send_mattermost_message(channel_id = "your-channel-id", message = "Test", priority = "InvalidPriority"),
-  error = function(e) {
-    print(e$message)
-  }
-)
-```
-
-## Tests
-
-The package includes unit tests written with testthat. You can run the tests using:
-
-``` r
-library(testthat)
-test_dir("tests")
-```
-
-## Known Issues
-
-```         
-Priority Support: The priority field for messages may not be supported on all Mattermost servers. If the server doesn't support this feature, a HTTP 501 Not Implemented error will be raised. The function has been designed to bypass this field in such cases, but check with your server admin if you encounter issues.
-```
-
-## Future Enhancements
-
-```         
-Improve support for priority metadata by adding automatic checks for Mattermost server version compatibility.
-Add more robust error handling for various API failures.
-Implement threading support (root_id) for replies within conversations.
-```
-
-## Contributing
-
-Contributions to improve MattermostR are welcome! Please open an issue or submit a pull request. How to Contribute
-
-```         
-Fork the repository.
-Create a new branch with your changes.
-Make sure all tests pass.
-Submit a pull request.
-```
+Add more Mattermost API endpoints for team and user management.
+Implement message threading support.
+Add more unit tests for edge cases and advanced API features.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License.
