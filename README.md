@@ -23,7 +23,7 @@ install.packages("devtools")
 devtools::install_github("your-username/MattermostR")
 ```
 
-Authentication
+## Authentication
 
 Before sending any messages or uploading files, you need to authenticate using your Mattermost API token.
 
@@ -32,7 +32,7 @@ Before sending any messages or uploading files, you need to authenticate using y
 auth <- authenticate_mattermost(base_url = "https://your-mattermost-server.com", token = "your-api-token")
 ```
 
-Usage Sending a Message
+## Usage Sending a Message
 
 You can send a message to a specific Mattermost channel using the send_mattermost_message function.
 
@@ -44,7 +44,7 @@ response <- send_mattermost_message(
 )
 ```
 
-Sending a Message with Priority
+# Sending a Message with Priority
 
 You can set the priority of the message (if supported by your Mattermost server) to one of the following values: "Normal", "High", or "Low". The function automatically normalizes the priority string to ensure proper casing.
 
@@ -61,7 +61,7 @@ response <- send_mattermost_message(
 Note: There is no need to manually use the normalize_priority() function, as send_mattermost_message() already handles priority normalization automatically.
 ```
 
-Uploading a File with a Message
+# Uploading a File with a Message
 
 You can attach a file to your message by providing the file path.
 
@@ -77,7 +77,7 @@ response <- send_mattermost_message(
 )
 ```
 
-Normalizing and Validating Priority
+# Normalizing and Validating Priority
 
 Although normalize_priority() is handled automatically by send_mattermost_message(), you can still call it manually if needed. This function converts different casings of priority values ("low", "LOW", "Low") into their correct format ("Low", "Normal", "High") and validates them.
 
@@ -88,7 +88,7 @@ normalize_priority("HIGH")  # Returns "High"
 normalize_priority("medium")  # Throws an error for invalid priority
 ```
 
-Handling Errors
+# Handling Errors
 
 The package includes basic error handling. For example, if you try to send a message with an invalid priority, you'll get an informative error message:
 
@@ -102,7 +102,7 @@ tryCatch(
 )
 ```
 
-Tests
+## Tests
 
 The package includes unit tests written with testthat. You can run the tests using:
 
@@ -111,13 +111,13 @@ library(testthat)
 test_dir("tests")
 ```
 
-Known Issues
+## Known Issues
 
 ```         
 Priority Support: The priority field for messages may not be supported on all Mattermost servers. If the server doesn't support this feature, a HTTP 501 Not Implemented error will be raised. The function has been designed to bypass this field in such cases, but check with your server admin if you encounter issues.
 ```
 
-Future Enhancements
+## Future Enhancements
 
 ```         
 Improve support for priority metadata by adding automatic checks for Mattermost server version compatibility.
@@ -125,7 +125,7 @@ Add more robust error handling for various API failures.
 Implement threading support (root_id) for replies within conversations.
 ```
 
-Contributing
+## Contributing
 
 Contributions to improve MattermostR are welcome! Please open an issue or submit a pull request. How to Contribute
 
@@ -136,6 +136,6 @@ Make sure all tests pass.
 Submit a pull request.
 ```
 
-License
+## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
