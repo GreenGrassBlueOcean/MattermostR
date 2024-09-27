@@ -1,5 +1,3 @@
-markdown
-
 # MattermostR
 
 MattermostR is an R package that simplifies interactions with the [Mattermost](https://mattermost.com/) platform through its REST API. The package allows you to send messages, upload files, and manage other Mattermost features from within R.
