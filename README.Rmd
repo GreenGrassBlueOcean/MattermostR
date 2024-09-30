@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 
-[![R-CMD-check.yaml](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml/badge.svg)](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml) 
+[![R-CMD-check.yaml](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/GreenGrassBlueOcean/MattermostR/graph/badge.svg)](https://app.codecov.io/gh/GreenGrassBlueOcean/MattermostR)
 
 <!-- badges: end -->
