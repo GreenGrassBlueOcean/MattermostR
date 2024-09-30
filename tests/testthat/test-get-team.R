@@ -1,7 +1,3 @@
-# Load testthat and mockery
-library(testthat)
-library(mockery)
-
 test_that("get_team() works as expected", {
 
   # 1. Test case: team_id is NULL
