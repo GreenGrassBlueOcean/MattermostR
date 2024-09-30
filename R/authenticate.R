@@ -96,17 +96,3 @@ check_mattermost_auth <- function(auth) {
     stop("The provided object is not a valid 'mattermost_auth' object.")
   }
 }
-
-
-
-
-#' Check Mattermost server status
-#'
-#' @param auth A list containing `base_url` and `headers` for authentication.
-#'
-#' @return The response object from the Mattermost API request.
-check_mattermost_status <- function(auth) {
-  endpoint <- "/api/v4/system/ping"
-  response <- mattermost_api_request(auth, endpoint, method = "GET", verbose = TRUE)
-  return(response)
-}
