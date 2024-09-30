@@ -60,7 +60,7 @@ You can install the MattermostR package from GitHub:
 install.packages("devtools")
 
 # Install MattermostR
-devtools::install_github("yourusername/MattermostR")
+devtools::install_github("GreenGrassBlueOcean/MattermostR")
 ```
 
 ## Usage
