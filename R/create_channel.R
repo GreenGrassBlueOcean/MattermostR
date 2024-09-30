@@ -12,9 +12,11 @@
 #' @return A list with details about the created channel.
 #' @export
 #' @examples
+#' \dontrun{
 #' teams <- get_all_teams()
 #' new_channel <- create_channel(team_id = teams$id[1], name = "newchannel2"
 #' , display_name = "a new channel", verbose = TRUE)
+#' }
 create_channel <- function(team_id = NULL, name = NULL, display_name = NULL, type = "O", verbose = FALSE, auth = authenticate_mattermost()) {
 
   # Check required input for completeness

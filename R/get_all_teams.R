@@ -23,7 +23,8 @@ get_all_teams <- function(verbose = FALSE, auth = authenticate_mattermost()){
   teams_data <- mattermost_api_request(auth = auth, endpoint = endpoint, method = "GET", verbose = verbose)
 
   if(length(teams_data) == 0L){
-    warning("The user for which the current bearer authentication key is taken is not part of any teams, change bearer key?, use get_me() to obtain more information about the current key user")
+    warning("The user for which the current bearer authentication key is taken is not part of any teams, change bearer key?
+            , use get_me() to obtain more information about the current key user")
   }
 
 

@@ -33,7 +33,9 @@ A list with details about the created channel.
 Create a new Mattermost channel
 }
 \examples{
+\dontrun{
 teams <- get_all_teams()
 new_channel <- create_channel(team_id = teams$id[1], name = "newchannel2"
 , display_name = "a new channel", verbose = TRUE)
+}
 }

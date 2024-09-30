@@ -121,8 +121,6 @@ normalize_priority <- function(priority) {
   }
 }
 
-
-
 # !!! this is the rest api specification!!!!
 # therefore file_ids and priority are not working at this moment
 # {
@@ -140,24 +138,3 @@ normalize_priority <- function(priority) {
 #     }
 #   }
 # }
-
-
-#' Normalize the priority input
-#'
-#' This function converts various casing inputs for priority to the correct format.
-#'
-#' @param priority A string representing the priority.
-#' @return A string with the corrected priority format.
-normalize_priority <- function(priority) {
-  priority_lowered <- tolower(priority)  # Convert to lower case for normalization
-
-  if (priority_lowered == "normal") {
-    return("Normal")
-  } else if (priority_lowered == "high") {
-    return("High")
-  } else if (priority_lowered == "low") {
-    return("Low")
-  } else {
-    stop(sprintf("Invalid priority: '%s'. Must be one of: Normal, High, Low", priority))
-  }
-}

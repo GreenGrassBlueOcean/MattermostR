@@ -10,6 +10,7 @@
 #' @return A list with details about the deletion status.
 #' @export
 #' @examples
+#' \dontrun{
 #' # First create a channel
 #' teams <- get_all_teams()
 #' new_channel <- create_channel(team_id = teams$id, name = "newchannel"
@@ -17,6 +18,7 @@
 #'
 #' # Now delete the channel
 #' info <- delete_channel(channel_id = new_channel$id, team_id = teams$id)
+#' }
 delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = authenticate_mattermost()) {
 
   # Check if channel_id is NULL or empty

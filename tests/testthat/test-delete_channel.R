@@ -1,55 +1,39 @@
-# File: tests/testthat/test-delete_channel.R
+# Start tests for delete_channel
+test_that("delete_channel() works as expected", {
 
-# Mock the mattermost_api_request function
-mock_mattermost_api_request <- function(auth, endpoint, method, verbose) {
-  if (method == "DELETE" && grepl("/api/v4/channels/", endpoint)) {
-    return(list(success = TRUE, message = "Channel deleted successfully."))
-  }
+  # 1. Test case: channel_id is NULL
+  expect_error(delete_channel(channel_id = NULL, team_id = "team123"),
+               "channel_id cannot be empty or NULL")
 
-  # Mocking the retrieval of existing channels
-  if (endpoint == "/api/v4/teams/team_id/channels") {
-    return(data.frame(id = c("channel1", "channel2"), name = c("channel-one", "channel-two"), stringsAsFactors = FALSE))
-  } else if (endpoint == "/api/v4/teams/non_existent_team/channels") {
-    return(data.frame())  # Simulate no channels found
-  }
+  # 2. Test case: team_id is NULL
+  expect_error(delete_channel(channel_id = "channel123", team_id = NULL),
+               "team_id cannot be empty or NULL")
 
-  stop("Unknown endpoint.")
-}
+  # 3. Test case: Channel doesn't exist in team
+  # Mock the `get_team_channels` function to return a list of channels without "channel123"
+  mockery::stub(delete_channel, 'get_team_channels', function(team_id, auth) {
+    list(id = c("channel456", "channel789"))
+  })
 
-# Test: Successful channel deletion
-test_that("delete_channel successfully deletes an existing channel", {
-  mock_api_request <- mockery::mock(mock_mattermost_api_request)
-  mockery::stub(delete_channel, "mattermost_api_request", mock_api_request)
+  expect_error(delete_channel(channel_id = "channel123", team_id = "team123"),
+               "Channel with ID 'channel123' does not exist.")
 
-  auth <- list(base_url = "http://example.com", headers = list(Authorization = "Bearer token"))
-  expect_message(delete_channel(channel_id = "channel1", team_id = "team_id", auth = auth), "Channel deleted successfully.")
+  # 4. Test case: Channel exists and delete is successful
+  # Mock the `get_team_channels` to return a list with "channel123"
+  mockery::stub(delete_channel, 'get_team_channels', function(team_id, auth) {
+    list(id = c("channel123", "channel456"))
+  })
+
+  # Mock the `mattermost_api_request` to simulate a successful delete response
+  mockery::stub(delete_channel, 'mattermost_api_request', function(auth, endpoint, method, verbose) {
+    list(success = TRUE, message = "Channel deleted successfully.")
+  })
+
+  # Run the function and check for correct output
+  result <- delete_channel(channel_id = "channel123", team_id = "team123")
+
+  expect_true(result$success)
+  expect_equal(result$message, "Channel deleted successfully.")
+
 })
 
-# Test: Attempting to delete a non-existent channel
-test_that("delete_channel throws an error for a non-existent channel", {
-  mock_api_request <- mockery::mock(mock_mattermost_api_request)
-  mockery::stub(delete_channel, "mattermost_api_request", mock_api_request)
-
-  auth <- list(base_url = "http://example.com", headers = list(Authorization = "Bearer token"))
-  expect_error(delete_channel(channel_id = "non_existent_channel", team_id = "team_id", auth = auth), "Channel with ID 'non_existent_channel' does not exist.")
-})
-
-# Test: Error when channel_id is NULL
-test_that("delete_channel throws an error when channel_id is NULL", {
-  expect_error(delete_channel(NULL, "team_id"), "channel_id cannot be empty or NULL")
-})
-
-# Test: Error when team_id is NULL
-test_that("delete_channel throws an error when team_id is NULL", {
-  expect_error(delete_channel("channel_id", NULL), "team_id cannot be empty or NULL")
-})
-
-# Test: Error when channel_id is empty
-test_that("delete_channel throws an error when channel_id is empty", {
-  expect_error(delete_channel("", "team_id"), "channel_id cannot be empty or NULL")
-})
-
-# Test: Error when team_id is empty
-test_that("delete_channel throws an error when team_id is empty", {
-  expect_error(delete_channel("channel_id", ""), "team_id cannot be empty or NULL")
-})

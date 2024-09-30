@@ -20,6 +20,7 @@ Parsed JSON response with channel information.
 Get information about a Mattermost channel
 }
 \examples{
+\dontrun{
  get_channel_info(channel_id = "newchannel2", verbose = TRUE)
-
+}
 }

@@ -5,19 +5,13 @@
 \title{Normalize the priority input}
 \usage{
 normalize_priority(priority)
-
-normalize_priority(priority)
 }
 \arguments{
 \item{priority}{A string representing the priority.}
 }
 \value{
 A string with the corrected priority format.
-
-A string with the corrected priority format.
 }
 \description{
-This function converts various casing inputs for priority to the correct format.
-
 This function converts various casing inputs for priority to the correct format.
 }

@@ -27,6 +27,7 @@ A list with details about the deletion status.
 Delete a Mattermost channel
 }
 \examples{
+\dontrun{
 # First create a channel
 teams <- get_all_teams()
 new_channel <- create_channel(team_id = teams$id, name = "newchannel"
@@ -34,4 +35,5 @@ new_channel <- create_channel(team_id = teams$id, name = "newchannel"
 
 # Now delete the channel
 info <- delete_channel(channel_id = new_channel$id, team_id = teams$id)
+}
 }

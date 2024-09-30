@@ -9,8 +9,9 @@
 #' @return Parsed JSON response with channel information.
 #' @export
 #' @examples
+#' \dontrun{
 #'  get_channel_info(channel_id = "newchannel2", verbose = TRUE)
-#'
+#'}
 get_channel_info <- function(channel_id, verbose = FALSE, auth = authenticate_mattermost()) {
 
   # Check required input for completeness

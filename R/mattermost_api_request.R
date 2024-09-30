@@ -96,6 +96,7 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
 handle_response_content <- function(response, verbose) {
   content_type <- httr2::resp_content_type(response)
 
+  # Check if the response is JSON
   if (grepl("application/json", content_type)) {
     if (verbose) {
       message("Response Body:")
@@ -103,6 +104,14 @@ handle_response_content <- function(response, verbose) {
       print(httr2::resp_body_json(response, simplifyVector = TRUE))
     }
     return(httr2::resp_body_json(response, simplifyVector = TRUE))
+
+    # If content type is not JSON, handle plain text or other types gracefully
+  } else if (grepl("text/plain", content_type)) {
+    if (verbose) {
+      message("Response Body (Plain Text):")
+      print(httr2::resp_body_string(response))
+    }
+    return(httr2::resp_body_string(response))  # Return the plain text as the response
   } else {
     message(sprintf("Unexpected content type '%s' received.", content_type))
     message("Response Body:")
@@ -112,3 +121,4 @@ handle_response_content <- function(response, verbose) {
     return(NULL)
   }
 }
+

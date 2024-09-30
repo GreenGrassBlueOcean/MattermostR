@@ -32,8 +32,11 @@ channels <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Get the channel ID for "Off-Topic" by display name
-get_channel_id_lookup(channels, display_name = "Off-Topic")
+# As this display_name is not unique for "Off-Topic" this will lead to an error.
+#' # get_channel_id_lookup(channels, display_name = "Off-Topic")
+
+# this will however return a result
+get_channel_id_lookup(channels, display_name = "Town Square")
 
 # Get the channel ID for "Town Square" by name
 get_channel_id_lookup(channels, name = "town-square")
