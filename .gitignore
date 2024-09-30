@@ -4,3 +4,7 @@
 .Ruserdata
 .httr-oauth
 output.txt
+*.log
+*.pyc
+README.Rmd
+inst/figures/mattermost.svg

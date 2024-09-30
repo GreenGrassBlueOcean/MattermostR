@@ -1,23 +1,34 @@
+---
+output: github_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # MattermostR <a href="https://github.com/GreenGrassBlueOcean/MattermostR"><img src="inst/figures/MattermostR_hex.png" alt="MattermostR website" align="right" height="138"/></a>
 
 <!-- badges: start -->
 
-[![R-CMD-check.yaml](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml/badge.svg)](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml)
-[![Codecov test
-coverage](https://codecov.io/gh/GreenGrassBlueOcean/MattermostR/graph/badge.svg)](https://app.codecov.io/gh/GreenGrassBlueOcean/MattermostR)
+[![R-CMD-check.yaml](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml/badge.svg)](https://github.com/GreenGrassBlueOcean/MattermostR/actions/workflows/r.yml) 
+[![Codecov test coverage](https://codecov.io/gh/GreenGrassBlueOcean/MattermostR/graph/badge.svg)](https://app.codecov.io/gh/GreenGrassBlueOcean/MattermostR)
 
 <!-- badges: end -->
 
 # MattermostR
 
-MattermostR is an R package designed to interact with the Mattermost API
-for sending messages, managing channels, uploading files, and more. The
-package includes functionality for automating interactions with
-Mattermost from R scripts, allowing you to easily send messages, upload
-attachments, and manage teams and channels.
+MattermostR is an R package designed to interact with the Mattermost API for sending messages, managing channels, uploading files, and more.
+The package includes functionality for automating interactions with Mattermost from R scripts, allowing you to easily send messages, upload attachments, and manage teams and channels.
 
 ## Installation
 
@@ -35,18 +46,14 @@ devtools::install_github("GreenGrassBlueOcean/MattermostR")
 
 ### 1. Send Messages with Priority
 
-Send messages to Mattermost channels with optional priorities: -
-**Normal** - **High** - **Low**
+Send messages to Mattermost channels with optional priorities: - **Normal** - **High** - **Low**
 
-The priority is automatically normalized in the
-`send_mattermost_message()` function, so you don’t need to worry about
-case sensitivity (e.g., `high`, `HIGH`, and `High` are all valid).
+The priority is automatically normalized in the `send_mattermost_message()` function, so you don't need to worry about case sensitivity (e.g., `high`, `HIGH`, and `High` are all valid).
 
 ### 2. Attach Files to Messages
 
-You can attach files to your messages by specifying a file path. The
-file is first uploaded to the Mattermost server, and its file ID is
-included in the message.
+You can attach files to your messages by specifying a file path.
+The file is first uploaded to the Mattermost server, and its file ID is included in the message.
 
 Example:
 
@@ -63,18 +70,15 @@ response <- send_mattermost_message(
 
 The package provides tools for managing channels and teams:
 
-1.List Channels and Groups: Retrieve all channels and groups from a
-team.  
+1.List Channels and Groups: Retrieve all channels and groups from a team.  
 2.Create Channels: Programmatically create new channels in a team.  
 3.Delete Channels: Delete existing channels.  
-4.Look Up Channels by Name: Find a specific channel by name and get its
-ID.
+4.Look Up Channels by Name: Find a specific channel by name and get its ID.  
 
 ### 4. Authentication
 
-Authenticate with the Mattermost API using a bearer token or by
-providing your username and password. Once authenticated, the token is
-stored for future API calls.
+Authenticate with the Mattermost API using a bearer token or by providing your username and password.
+Once authenticated, the token is stored for future API calls.
 
 ``` r
 auth <- authenticate_mattermost(
@@ -85,11 +89,9 @@ auth <- authenticate_mattermost(
 
 ### 5. Error Handling and Validation
 
-Priority Validation: Before sending a message, the priority is validated
-to ensure that it’s one of Normal, High, or Low. If an invalid priority
-is provided, the function will return an error. Input Validation:
-Ensures that required fields (such as channel_id and message) are
-provided before making API calls.
+Priority Validation: Before sending a message, the priority is validated to ensure that it's one of Normal, High, or Low.
+If an invalid priority is provided, the function will return an error.
+Input Validation: Ensures that required fields (such as channel_id and message) are provided before making API calls.
 
 ## Usage
 
@@ -136,8 +138,8 @@ delete_mattermost_channel(channel_id = "your-channel-id")
 ## Roadmap
 
 Add more Mattermost API endpoints for team and user management.
-Implement message threading support. Add more unit tests for edge cases
-and advanced API features.
+Implement message threading support.
+Add more unit tests for edge cases and advanced API features.
 
 ## License
 
