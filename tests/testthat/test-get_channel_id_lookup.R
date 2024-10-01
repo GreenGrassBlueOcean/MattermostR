@@ -9,6 +9,12 @@ channels <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Test: check rejects wrong input
+test_that("Lookup by display_name returns correct channel ID", {
+  expect_error(get_channel_id_lookup(channels = list(), display_name = "Town Square")
+               , "Input must be a data frame containing 'id', 'display_name', and 'name' columns.")
+})
+
 # Test: Successful lookup by display_name
 test_that("Lookup by display_name returns correct channel ID", {
   expect_equal(get_channel_id_lookup(channels, display_name = "Town Square")
