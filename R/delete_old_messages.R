@@ -33,6 +33,7 @@ delete_old_messages <- function(channel_id, days, auth = authenticate_mattermost
   messages <- get_channel_posts(channel_id = channel_id)
 
   # Extract the messages and their timestamps
+  create_at <- NULL
   messages_to_delete <- subset(messages, as.numeric(create_at) < as.numeric(cutoff_time))
 
   # Check if there are messages to delete

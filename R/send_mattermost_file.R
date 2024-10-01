@@ -37,6 +37,12 @@ send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = a
   check_not_null(file_path, "file_path")
   check_mattermost_auth(auth)
 
+  # Check if the file exists
+  if (!file.exists(file_path)) {
+    stop("The file specified by 'file_path' does not exist.")
+  }
+
+
   # Construct headers
   headers <- list(
     Authorization = auth$headers,
