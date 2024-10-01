@@ -69,7 +69,7 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
       }
       httr2::req_perform(req)
     },
-    httr2_error = function(e) {
+    error = function(e) {
       message("HTTP error occurred: ", conditionMessage(e))
       return(NULL)  # Return NULL to indicate the request failed
     }

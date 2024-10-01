@@ -1,9 +1,3 @@
-# Load testthat and mockery
-library(testthat)
-library(mockery)
-
-# Assuming the helper functions are available for mocking
-# source("helper.R")
 
 test_that("mattermost_api_request() works as expected", {
 
@@ -57,36 +51,44 @@ test_that("mattermost_api_request() works as expected", {
   expect_equal(result$id, "newteam123")
   expect_equal(result$name, "New Test Team")
 
-  # # 5. Test case: Retry mechanism (simulate failure and success)
+  # 5. Test case: Retry mechanism (simulate failure and success)
   # test_that("mattermost_api_request() handles retries correctly", {
-  #
   #   retry_count <- 0
+  #   max_retries <- 3
   #
+  #   # Mock req_perform to fail on the first two attempts and succeed on the third
   #   mockery::stub(mattermost_api_request, 'httr2::req_perform', function(req) {
   #     retry_count <<- retry_count + 1
-  #     if (retry_count < 3) {
-  #       stop("Request failed, retrying...")  # Simulate failure
+  #     if (retry_count < max_retries) {
+  #       # Simulate an error to trigger the retry logic
+  #       stop("Request failed, retrying...")
   #     }
-  #     # Simulate a successful response on the 3rd attempt
+  #     # Simulate a successful response on the third attempt
   #     structure(list(
   #       body = charToRaw('{"id": "retryteam123", "name": "Retry Test Team"}'),
   #       status_code = 200L,
   #       headers = list(`content-type` = "application/json"),
-  #       cache = new.env(parent = emptyenv())  # Add a mock cache environment to simulate internal structure
+  #       cache = new.env(parent = emptyenv())
   #     ), class = "httr2_response")
   #   })
   #
-  #   # Mock the other necessary response functions
+  #   # Mock the necessary response functions
   #   mockery::stub(mattermost_api_request, 'httr2::resp_content_type', function(response) "application/json")
   #   mockery::stub(mattermost_api_request, 'httr2::resp_body_json', function(response, simplifyVector) list(id = "retryteam123", name = "Retry Test Team"))
   #
   #   # Call the function and check that it works after retries
   #   result <- mattermost_api_request(auth = list(base_url = "http://localhost", headers = "Bearer token"), endpoint = "/api/v4/teams")
   #
+  #   # Check the returned result
   #   expect_equal(result$id, "retryteam123")
   #   expect_equal(result$name, "Retry Test Team")
-  #   expect_equal(retry_count, 3)  # Ensure it retried 2 times and succeeded on the 3rd
+  #   expect_equal(retry_count, max_retries)  # Ensure it retried the expected number of times
   # })
+  #
+  #
+  #
+  #
+
 
   # # 6. Test case: Unexpected content type (non-JSON)
   # mockery::stub(mattermost_api_request, 'httr2::req_perform', function(req) {
