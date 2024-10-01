@@ -23,3 +23,11 @@ Parsed JSON response with posts from the channel.
 \description{
 Get posts from a Mattermost channel
 }
+\examples{
+\dontrun{
+  teams <- get_all_teams()
+  team_channels <- get_team_channels(team_id = teams$id[1])
+  channel_id <- get_channel_id_lookup(team_channels, name = "off-topic")
+  posts <- get_channel_posts(channel_id)
+}
+}
