@@ -72,6 +72,16 @@
     <p>Parsed JSON response with posts from the channel.</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span>  <span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_all_teams.html">get_all_teams</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">team_channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="va">teams</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">channel_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_channel_id_lookup.html">get_channel_id_lookup</a></span><span class="op">(</span><span class="va">team_channels</span>, name <span class="op">=</span> <span class="st">"off-topic"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">posts</span> <span class="op">&lt;-</span> <span class="fu">get_channel_posts</span><span class="op">(</span><span class="va">channel_id</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

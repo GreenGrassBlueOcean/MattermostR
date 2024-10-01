@@ -8,6 +8,7 @@
 <url><loc>/reference/check_mattermost_status.html</loc></url>
 <url><loc>/reference/create_channel.html</loc></url>
 <url><loc>/reference/delete_channel.html</loc></url>
+<url><loc>/reference/delete_old_messages.html</loc></url>
 <url><loc>/reference/delete_post.html</loc></url>
 <url><loc>/reference/get_all_teams.html</loc></url>
 <url><loc>/reference/get_all_users.html</loc></url>
