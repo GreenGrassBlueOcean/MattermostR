@@ -20,7 +20,6 @@
 #' info <- delete_channel(channel_id = new_channel$id, team_id = teams$id)
 #' }
 delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = authenticate_mattermost()) {
-
   # Check if channel_id is NULL or empty
   if (is.null(channel_id) || !nzchar(channel_id)) {
     stop("channel_id cannot be empty or NULL")
@@ -50,8 +49,8 @@ delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = authenti
   )
 
   # Check the response for errors (assuming API returns a list with a success key)
-  if (!response$success) {
-    stop(response$message)
+  if (!(response$status == "OK")) {
+    stop(paste("deleting channel with channel_id:", channel_id, "failed"))
   }
 
   return(response)

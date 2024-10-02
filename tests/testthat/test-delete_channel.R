@@ -26,14 +26,24 @@ test_that("delete_channel() works as expected", {
 
   # Mock the `mattermost_api_request` to simulate a successful delete response
   mockery::stub(delete_channel, 'mattermost_api_request', function(auth, endpoint, method, verbose) {
-    list(success = TRUE, message = "Channel deleted successfully.")
+    list(status = "OK")
   })
 
   # Run the function and check for correct output
   result <- delete_channel(channel_id = "channel123", team_id = "team123")
 
-  expect_true(result$success)
-  expect_equal(result$message, "Channel deleted successfully.")
+  expect_true(result$status == "OK")
+
+
+  # Mock the `mattermost_api_request` to simulate a unsuccessful delete response
+  mockery::stub(delete_channel, 'mattermost_api_request', function(auth, endpoint, method, verbose) {
+    list(status = "error")
+  })
+
+  # Run the function and check for correct output
+  expect_error(result <- delete_channel(channel_id = "channel123", team_id = "team123")
+               , "deleting channel with channel_id: channel123 failed")
+
 
 })
 
