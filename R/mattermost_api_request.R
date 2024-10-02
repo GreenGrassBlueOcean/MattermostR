@@ -1,3 +1,5 @@
+# File: R/mattermost_api_request.R
+
 #' Make a Mattermost API Request
 #'
 #' This function sends an HTTP request to the Mattermost API using authentication details,
@@ -10,6 +12,8 @@
 #' @param body (Optional) A list or object representing the body of the request (e.g., for `POST` or `PUT` requests).
 #' @param multipart (Logical) Set to `TRUE` if the request includes multipart data (e.g., file upload).
 #' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
+#'
+#' @importFrom httr2 req_perform
 #'
 #' @return The content of the response, usually parsed as JSON, or an error message if the request fails.
 #' @export
@@ -33,8 +37,7 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
   )
 
   # Add headers
-  req <- req |>
-    httr2::req_headers(!!!headers)
+  req <- httr2::req_headers(req, !!!headers)
 
   # Set the request method
   req <- switch(method,
@@ -55,19 +58,19 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
   }
 
   # Add retry logic with exponential backoff
-  req <- req |>
-    httr2::req_retry(
-      max_tries = 5,
-      backoff = function(attempt) { 0.5 * 2^(attempt - 1) } # Exponential backoff
-    )
+  req <- httr2::req_retry(
+    req,
+    max_tries = 5,
+    backoff = function(attempt) { 0.5 * 2^(attempt - 1) } # Exponential backoff
+  )
 
   # Perform the request and handle errors
   response <- tryCatch(
     {
       if (verbose) {
-        req <- req |> httr2::req_verbose()
+        req <- httr2::req_verbose(req)
       }
-      httr2::req_perform(req)
+      req_perform(req)
     },
     error = function(e) {
       message("HTTP error occurred: ", conditionMessage(e))
@@ -81,6 +84,25 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
     return(NULL)
   }
 
+  # Check for HTTP errors
+  status_code <- httr2::resp_status(response)
+  if (status_code >= 400) {
+    # Extract error details from the response
+    error_content <- httr2::resp_body_string(response)
+    content_type <- httr2::resp_content_type(response)
+
+    message("HTTP error occurred: ", status_code, " ", httr2::resp_status_desc(response))
+
+    if (grepl("application/json", content_type)) {
+      error_info <- httr2::resp_body_json(response, simplifyVector = TRUE)
+      message("Error details: ", jsonlite::toJSON(error_info, auto_unbox = TRUE, pretty = TRUE))
+    } else {
+      message("Error content: ", error_content)
+    }
+    return(NULL)
+  }
+
+
   # Handle the response content
   result <- handle_response_content(response, verbose = verbose)
 
@@ -93,32 +115,65 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
 #' @param verbose Boolean. If `TRUE`, the function will print the response details for more information.
 #'
 #' @return The response object if the content type is JSON, or a warning if it's not.
-handle_response_content <- function(response, verbose) {
-  content_type <- httr2::resp_content_type(response)
+handle_response_content <- function(response, verbose = FALSE) {
 
-  # Check if the response is JSON
-  if (grepl("application/json", content_type)) {
-    if (verbose) {
-      message("Response Body:")
-      print(httr2::resp_headers(response))
-      print(httr2::resp_body_json(response, simplifyVector = TRUE))
-    }
-    return(httr2::resp_body_json(response, simplifyVector = TRUE))
+   # Safely retrieve content type with tryCatch
+  content_type <- tryCatch({
+    httr2::resp_content_type(response)
+  }, error = function(e) {
+    warning("Failed to retrieve content type: ", e$message)
+    return(NA)
+  })
 
-    # If content type is not JSON, handle plain text or other types gracefully
-  } else if (grepl("text/plain", content_type)) {
-    if (verbose) {
-      message("Response Body (Plain Text):")
-      print(httr2::resp_body_string(response))
-    }
-    return(httr2::resp_body_string(response))  # Return the plain text as the response
-  } else {
-    message(sprintf("Unexpected content type '%s' received.", content_type))
-    message("Response Body:")
-    print(httr2::resp_headers(response))
-    print(httr2::resp_body_string(response))
-    warning("Received unexpected content type from server.")
+  # If content type is NA, provide a warning and return NULL
+  if (is.na(content_type)) {
+    warning("Content type is NA; cannot process response.")
     return(NULL)
   }
+
+  # Handle empty response bodies
+  if (!httr2::resp_has_body(response) || length(httr2::resp_body_raw(response)) == 0) {
+    if (verbose) {
+      message("Empty response body.")
+    }
+    return(NULL)
+  }
+
+  # Function to print response details
+  print_response_details <- function(response, body) {
+    if (verbose) {
+      message("Response Headers:")
+      print(httr2::resp_headers(response))
+      message("Response Body:")
+      print(body)
+    }
+  }
+
+  # Handle JSON content
+  if (grepl("application/json", content_type)) {
+    body_json <- tryCatch({
+      httr2::resp_body_json(response, simplifyVector = TRUE)
+    }, error = function(e) {
+      warning("Failed to parse JSON content: ", e$message)
+      return(NULL)
+    })
+
+    print_response_details(response, body_json)
+    return(body_json)
+  }
+
+  # Handle plain text content
+  if (grepl("text/plain", content_type)) {
+    body_text <- httr2::resp_body_string(response)
+    print_response_details(response, body_text)
+    return(body_text)
+  }
+
+  # Handle other content types
+  warning(sprintf("Unexpected content type '%s' received.", content_type))
+  body_text <- httr2::resp_body_string(response)
+  print_response_details(response, body_text)
+
+  return(NULL)
 }
 

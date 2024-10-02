@@ -1,0 +1,21 @@
+[
+    {
+        "id": "8u5dmgbbo3fc8ry7a1p8eo6mjw",
+        "create_at": 1727787546044,
+        "update_at": 1727787546044,
+        "delete_at": 0,
+        "display_name": "test",
+        "name": "test",
+        "description": "",
+        "email": "testing",
+        "type": "O",
+        "company_name": "",
+        "allowed_domains": "",
+        "invite_id": "qmhce8beeigc7mcz7zoou5gd5a",
+        "allow_open_invite": false,
+        "scheme_id": "",
+        "group_constrained": false,
+        "policy_id": null,
+        "cloud_limits_archived": false
+    }
+]

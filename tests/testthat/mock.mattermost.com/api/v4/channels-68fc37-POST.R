@@ -1,0 +1,10 @@
+structure(list(method = "POST", url = "https://z03qf5.stackhero-network.com/api/v4/channels", 
+    status_code = 201L, headers = structure(list(Server = "nginx", 
+        Date = "Wed, 02 Oct 2024 10:59:42 GMT", `Content-Type` = "application/json", 
+        `Content-Length` = "482", Connection = "keep-alive", 
+        `Permissions-Policy` = "", `Referrer-Policy` = "no-referrer", 
+        Vary = "Accept-Encoding", `X-Content-Type-Options` = "nosniff", 
+        `X-Request-Id` = "3kt8oxkt57bbzr79hdib8jbk9w", `X-Version-Id` = "9.11.1.10419911144.f40e6775c73928dfabc574dd3b26824c.false", 
+        `X-Frame-Options` = "SAMEORIGIN", `X-XSS-Protection` = "1; mode=block"), class = "httr2_headers"), 
+    body = charToRaw("{\"id\":\"h4xtsk1mgtrt781whd7whb8jee\",\"create_at\":1727866782426,\"update_at\":1727866782426,\"delete_at\":0,\"team_id\":\"8u5dmgbbo3fc8ry7a1p8eo6mjw\",\"type\":\"P\",\"display_name\":\"Test Channel\",\"name\":\"test-channel-mattermost-unit-test\",\"header\":\"\",\"purpose\":\"\",\"last_post_at\":0,\"total_msg_count\":0,\"extra_update_at\":0,\"creator_id\":\"8eppmmzjctrod8nxg1axb38nmy\",\"scheme_id\":null,\"props\":null,\"group_constrained\":null,\"shared\":null,\"total_msg_count_root\":0,\"policy_id\":null,\"last_root_post_at\":0}\n"), 
+    cache = new.env(parent = emptyenv())), class = "httr2_response")

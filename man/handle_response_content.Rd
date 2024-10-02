@@ -4,7 +4,7 @@
 \alias{handle_response_content}
 \title{Handle the content of the response}
 \usage{
-handle_response_content(response, verbose)
+handle_response_content(response, verbose = FALSE)
 }
 \arguments{
 \item{response}{The response object from the API request.}
