@@ -76,7 +76,7 @@ authenticate_mattermost <- function(base_url, token = NULL, username = NULL, pas
 
   # 6. Test connection if required
   if (test_connection) {
-    response <- check_mattermost_status(verbose = FALSE, auth)
+    response <- check_mattermost_status(verbose = FALSE, auth = auth)
     if (response != TRUE) {
       stop("Connection to Mattermost failed.")
     }

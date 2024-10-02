@@ -11,7 +11,7 @@ test_that("delete_channel() works as expected", {
 
   # 3. Test case: Channel doesn't exist in team
   # Mock the `get_team_channels` function to return a list of channels without "channel123"
-  mockery::stub(delete_channel, 'get_team_channels', function(team_id, auth) {
+  mockery::stub(delete_channel, 'get_team_channels', function(team_id,  verbose, auth) {
     list(id = c("channel456", "channel789"))
   })
 
@@ -20,7 +20,7 @@ test_that("delete_channel() works as expected", {
 
   # 4. Test case: Channel exists and delete is successful
   # Mock the `get_team_channels` to return a list with "channel123"
-  mockery::stub(delete_channel, 'get_team_channels', function(team_id, auth) {
+  mockery::stub(delete_channel, 'get_team_channels', function(team_id, verbose,  auth) {
     list(id = c("channel123", "channel456"))
   })
 

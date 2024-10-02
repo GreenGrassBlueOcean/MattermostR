@@ -32,7 +32,9 @@ delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = authenti
   }
 
   # Check if the channel exists using get_team_channels
-  existing_channels <- get_team_channels(team_id, auth)
+  existing_channels <- get_team_channels( team_id = team_id
+                                        , auth =  auth
+                                        , verbose = verbose)
   if (!any(existing_channels$id == channel_id)) {
     stop("Channel with ID '", channel_id, "' does not exist.")
   }

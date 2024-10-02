@@ -23,7 +23,7 @@ test_that("create_channel() works as expected", {
   mockery::stub(create_channel, 'check_mattermost_auth', function(auth) {})
 
   # 5. Test case: Channel with the same name already exists
-  mockery::stub(create_channel, 'get_team_channels', function(team_id, auth) {
+  mockery::stub(create_channel, 'get_team_channels', function(team_id, verbose, auth) {
     return(data.frame(name = c("newchannel", "existingchannel")))
   })
   expect_error(create_channel(team_id = "123", name = "newchannel", display_name = "New Channel"),

@@ -30,7 +30,7 @@ delete_old_messages <- function(channel_id, days, auth = authenticate_mattermost
   cutoff_time <- as.POSIXct(as.numeric(Sys.time() - (days * 86400)), origin = "1970-01-01", tz = "UTC") # 86400 seconds in a day
 
   # Get messages from the channel
-  messages <- get_channel_posts(channel_id = channel_id)
+  messages <- get_channel_posts(channel_id = channel_id, auth = auth)
 
   # Extract the messages and their timestamps
   create_at <- NULL

@@ -54,12 +54,12 @@ send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = a
          httr2::req_headers(!!!headers)
 
   if(!is.null(comment)){
-    req <- httr2::req_body_multipart(req,
+    req <- httr2::req_body_multipart(.req = req,
                                      files = curl::form_file(file_path), # Add the file to the request
                                      channel_id = channel_id,
                                      comment = comment)
   } else {
-    req <- httr2::req_body_multipart(req,
+    req <- httr2::req_body_multipart(.req =  req,
                                      files = curl::form_file(file_path), # Add the file to the request
                                      channel_id = channel_id
                                      )
@@ -75,7 +75,7 @@ send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = a
   response <- httr2::req_perform(req)
 
   # Handle the response content
-  result <- handle_response_content(response, verbose = verbose)
+  result <- handle_response_content(response = response, verbose = verbose)
 
   return(result)
 }

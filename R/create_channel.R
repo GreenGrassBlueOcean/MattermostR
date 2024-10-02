@@ -26,7 +26,9 @@ create_channel <- function(team_id = NULL, name = NULL, display_name = NULL, typ
   check_mattermost_auth(auth)
 
   # Check if a channel with the same name already exists
-  existing_channels <- get_team_channels(team_id, auth)  # Use the existing function to get channels
+  existing_channels <- get_team_channels(team_id = team_id
+                                        , auth = auth
+                                        , verbose = verbose)  # Use the existing function to get channels
 
   # Check for uniqueness of the channel name
   if (any(existing_channels$name == name)) {
