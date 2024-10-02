@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# MattermostR <a href="https://github.com/GreenGrassBlueOcean/MattermostR"><img src="inst/figures/MattermostR_hex.png" alt="MattermostR website" align="right" height="138"/></a>
+# MattermostR <a href="https://github.com/GreenGrassBlueOcean/MattermostR"><img src="man/figures/MattermostR_hex.png" alt="MattermostR website" align="right" height="138"/></a>
 
 <!-- badges: start -->
 

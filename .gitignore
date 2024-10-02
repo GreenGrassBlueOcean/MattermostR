@@ -7,3 +7,4 @@
 *.pyc
 README.Rmd
 inst/figures/mattermost.svg
+docs
