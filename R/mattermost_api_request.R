@@ -73,10 +73,10 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
       req_perform(req)
     },
     error = function(e) {
-      message("HTTP error occurred: ", conditionMessage(e))
-      return(NULL)  # Return NULL to indicate the request failed
+      handle_http_error(e)
     }
   )
+
 
   # If the response is NULL, stop further processing
   if (is.null(response)) {
