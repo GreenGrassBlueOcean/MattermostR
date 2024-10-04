@@ -37,7 +37,6 @@
 #' response <- send_mattermost_message(
 #'   channel_id = channel_id,
 #'   message = message,
-#'   priority = "High",
 #'   file_path = tmp_plot,
 #'   verbose = TRUE
 #' )
@@ -78,7 +77,7 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
   priority <- normalize_priority(priority)
 
   # File upload handling
-  file_infos <- list()
+  file_ids <- list()
   if (!is.null(file_path)) {
     # Ensure that file_path is either a single file or multiple files
     if (length(file_path) < 1) {
@@ -86,7 +85,7 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
     }
 
     # Iterate through each file and upload it
-    file_infos <- lapply(file_path, function(path) {
+    file_ids <- lapply(file_path, function(path) {
       # Check if the file exists
       if (!file.exists(path)) {
         stop(sprintf("The file specified by 'file_path' does not exist: %s", path))
@@ -108,10 +107,12 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
         stop("Unexpected format in file response. Unable to extract file ID.")
       }
     })
-  }
 
-  # Extract file IDs from file_infos
-  file_ids <- unlist(file_infos)
+    # Ensure that the number of files does not exceed 5
+    if (length(file_ids) > 5) {
+      stop("A maximum of 5 files can be attached to a message.")
+    }
+  }
 
   # Define the endpoint for sending messages
   endpoint <- "/api/v4/posts"
@@ -131,8 +132,11 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
   if (priority != "Normal") {
     body$props <- list(
       priority = list(
-        priority = priority,
-        requested_ack = TRUE  # Set to TRUE if you want acknowledgments
+        priority = switch(priority,
+                          "High" = "important",
+                          "Low" = "minor",
+                          priority)
+        # ,requested_ack = FALSE  # Set to TRUE if you want acknowledgments
       )
     )
   }

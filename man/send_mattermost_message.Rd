@@ -58,7 +58,6 @@ ggplot2::ggsave(filename = tmp_plot, plot = plot)
 response <- send_mattermost_message(
   channel_id = channel_id,
   message = message,
-  priority = "High",
   file_path = tmp_plot,
   verbose = TRUE
 )

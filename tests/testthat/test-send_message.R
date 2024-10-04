@@ -46,9 +46,12 @@ test_that("send_mattermost_message() works as expected", {
   expect_error(normalize_priority("invalid"), "Invalid priority: 'invalid'. Must be one of: Normal, High, Low")
 })
 
+
+# Updated unit tests for the send_mattermost_message function
+
 test_that("Successful message sending with file", {
   # Define the mock response for send_mattermost_file
-  file_response <- list(file_infos = list("file123"))
+  file_response <- list(file_infos = list(list(id = "file123")))
 
   # Mock check_mattermost_auth to do nothing (auth is assumed valid)
   mockery::stub(send_mattermost_message, 'check_mattermost_auth', function(auth) {})
@@ -68,7 +71,9 @@ test_that("Successful message sending with file", {
 
   # Mock the mattermost_api_request function to simulate a successful message posting
   mockery::stub(send_mattermost_message, 'mattermost_api_request', function(auth, endpoint, method, body, verbose) {
-    expect_equal(body$file_ids, "file123")  # Check that the correct file ID is being sent in the body
+    # Extract file IDs correctly from body$file_ids
+    file_ids <- lapply(body$file_ids, function(f) f$id)
+    expect_equal(file_ids, list("file123"))  # Check that the correct file ID is being sent in the body
     return(mock_response)
   })
 
@@ -87,12 +92,11 @@ test_that("Successful message sending with file", {
   unlink(temp_file)
 })
 
-
 test_that("Successful message sending with multiple files", {
   # Define mock responses for send_mattermost_file, one for each file
   file_responses <- list(
-    list(file_infos = list("file123")),
-    list(file_infos = list("file456"))
+    list(file_infos = list(list(id = "file123"))),
+    list(file_infos = list(list(id = "file456")))
   )
 
   # Create two temporary files to simulate multiple file uploads
@@ -104,7 +108,6 @@ test_that("Successful message sending with multiple files", {
 
   # Mock check_mattermost_auth to do nothing (auth is assumed valid)
   mockery::stub(send_mattermost_message, 'check_mattermost_auth', function(auth) {})
-
 
   # Mock the send_mattermost_file function to simulate successful file uploads
   mockery::stub(send_mattermost_message, 'send_mattermost_file', function(channel_id, file_path, comment, auth, verbose) {
@@ -124,7 +127,9 @@ test_that("Successful message sending with multiple files", {
 
   # Mock the mattermost_api_request function to simulate successful message posting
   mockery::stub(send_mattermost_message, 'mattermost_api_request', function(auth, endpoint, method, body, verbose) {
-    expect_equal(body$file_ids, c("file123", "file456"))  # Check that both file IDs are being sent in the body
+    # Extract file IDs correctly from body$file_ids
+    file_ids <- lapply(body$file_ids, function(f) f$id)
+    expect_equal(file_ids, list("file123", "file456"))  # Check that both file IDs are being sent in the body
     return(mock_response)
   })
 
@@ -153,7 +158,7 @@ test_that("Successful message sending with verbose enabled", {
   writeLines("This is a test file for Mattermost upload", temp_file)
 
   # Mock response for file upload
-  file_response <- list(file_infos = list("file123"))
+  file_response <- list(file_infos = list(list(id = "file123")))
 
   # Mock send_mattermost_file
   mockery::stub(send_mattermost_message, 'send_mattermost_file', function(channel_id, file_path, comment, auth, verbose) {
@@ -166,7 +171,9 @@ test_that("Successful message sending with verbose enabled", {
 
   # Mock the mattermost_api_request function
   mockery::stub(send_mattermost_message, 'mattermost_api_request', function(auth, endpoint, method, body, verbose) {
-    expect_equal(body$file_ids, "file123")  # Ensure correct file ID is sent in the body
+    # Extract file IDs correctly from body$file_ids
+    file_ids <- lapply(body$file_ids, function(f) f$id)
+    expect_equal(file_ids, list("file123"))  # Ensure correct file ID is sent in the body
     return(mock_response)
   })
 
@@ -198,12 +205,12 @@ test_that("Priority setting is correctly handled", {
     # Check priority settings based on the test case
     if (body$message == "Priority High") {
       expect_true(!is.null(body$props))
-      expect_equal(body$props$priority$priority, "High")
+      expect_equal(body$props$priority$priority, "important")
     } else if (body$message == "Priority Normal") {
       expect_true(is.null(body$props))  # No priority props should be included
     } else if (body$message == "Priority Low") {
       expect_true(!is.null(body$props))
-      expect_equal(body$props$priority$priority, "Low")
+      expect_equal(body$props$priority$priority, "minor")
     }
     return(mock_response)
   })
