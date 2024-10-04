@@ -2,12 +2,12 @@
 % Please edit documentation in R/send_message.R
 \name{send_mattermost_message}
 \alias{send_mattermost_message}
-\title{Send a text message to a Mattermost channel}
+\title{Send a text message to a Mattermost channel, optionally with multiple attachments}
 \usage{
 send_mattermost_message(
   channel_id,
   message,
-  priority = NULL,
+  priority = "Normal",
   file_path = NULL,
   comment = NULL,
   verbose = FALSE,
@@ -24,9 +24,9 @@ send_mattermost_message(
 - "High"
 - "Low"}
 
-\item{file_path}{The path to the file to be sent.}
+\item{file_path}{A vector of file paths to be sent as attachments.}
 
-\item{comment}{A comment to accompany the attachment file.}
+\item{comment}{A comment to accompany the attachment files.}
 
 \item{verbose}{Boolean. If `TRUE`, the function will print request/response details for more information.}
 
@@ -36,7 +36,7 @@ send_mattermost_message(
 Parsed response from the Mattermost server.
 }
 \description{
-Send a text message to a Mattermost channel
+This function sends a text message to a Mattermost channel, optionally including one or more attachment files.
 }
 \examples{
 \dontrun{
@@ -48,18 +48,37 @@ channel_id <- get_channel_id_lookup(team_channels, "Off-Topic")
 
 message <- paste("Hello, Mattermost! This is a test message at", Sys.time())
 
-# Send the message with Normal priority
-response <- send_mattermost_message(channel_id = channel_id
-, message = message, priority = "Low", verbose = TRUE)
+# Send the message with a plot attachment
+tmp_plot <- tempfile(fileext = ".png")
+plot <- ggplot2::ggplot(cars, ggplot2::aes(x = speed, y = dist)) +
+  ggplot2::geom_point()
+
+ggplot2::ggsave(filename = tmp_plot, plot = plot)
+
+response <- send_mattermost_message(
+  channel_id = channel_id,
+  message = message,
+  priority = "High",
+  file_path = tmp_plot,
+  verbose = TRUE
+)
+print(response)
 
 
-#send message with attachment file
+# Send message with a text file attachment
 fileconn <- file("output.txt")
 writeLines(c("Hello", "world"), fileconn)
 close(fileconn)
 
-response <- send_mattermost_message(channel_id = channel_id
-, message = message, file_path = "output.txt", verbose = TRUE, priority = "High")
-unlink(fileconn)
+response <- send_mattermost_message(
+  channel_id = channel_id,
+  message = message,
+  file_path = c("output.txt", tmp_plot),
+  verbose = TRUE,
+  priority = "High"
+)
+print(response)
+unlink("output.txt")
+unlink(tmp_plot)
 }
 }

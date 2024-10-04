@@ -1,8 +1,5 @@
 # File: tests/testthat/test-http_error_handler.R
 
-library(testthat)
-library(httr2)
-
 # Mock function to simulate different HTTP error responses
 mock_error_response <- function(status_code, body) {
   structure(

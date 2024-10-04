@@ -2,7 +2,9 @@
 
 #' Send a file to a Mattermost channel
 #'
-#' This function sends a file to a specified Mattermost channel along with an optional comment
+#' This function sends a file to a specified Mattermost channel along with an optional comment.
+#' **Note**: Simply sending a file will not make it appear in the channel.
+#' To ensure the file appears, it must be combined with a message using `send_mattermost_message()`.
 #'
 #' @param channel_id The ID of the channel to which the file should be sent.
 #' @param file_path The path to the file to be sent.
@@ -11,7 +13,8 @@
 #' @param auth A list containing `base_url` and `headers` for authentication.
 #'
 #' @return The response from the Mattermost API.
-#' @export
+#' @noRd
+#'
 #' @examples
 #' \dontrun{
 #' # Create a sample text file
@@ -22,8 +25,14 @@
 #' teams <- get_all_teams()
 #' team_channels <- get_team_channels(team_id = teams$id[1])
 #' channel_id <- get_channel_id_lookup(team_channels, "Off-Topic")
-#' response <- send_mattermost_file(channel_id = channel_id
-#' ,file_path = "output.txt",comment = "A simple text file.", verbose = TRUE)
+#'
+#' # Send a file and combine it with a message
+#' response <- send_mattermost_message(
+#'   channel_id = channel_id,
+#'   message = "Here's a simple text file.",
+#'   file_path = "output.txt",
+#'   verbose = TRUE
+#' )
 #' print(response)
 #' unlink(fileconn)
 #' }

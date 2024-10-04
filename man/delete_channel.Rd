@@ -24,7 +24,15 @@ delete_channel(
 A list with details about the deletion status.
 }
 \description{
-Delete a Mattermost channel
+Archives a Mattermost channel.
+}
+\details{
+Note on Channel Deletion
+
+When a channel is deleted online via the Mattermost API, it is not permanently removed but rather
+archived. The archived channel can be restored manually through the Mattermost channel management
+interface in the GUI. While the Mattermost REST API specification does include an option for
+permanent deletion of channels, this functionality is currently not implemented in this package.
 }
 \examples{
 \dontrun{
