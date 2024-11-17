@@ -135,3 +135,48 @@ test_that("handle_http_error handles errors with undecodable response body", {
 })
 
 
+test_that("handle_http_error handles decoding failure in legacy error structure", {
+  # Simulate a legacy error structure with an unreadable body
+  legacy_error_with_unreadable_body <- structure(
+    list(
+      resp = structure(
+        list(
+          method = "POST",
+          url = "https://fakeurl.com/api/v4/channels",
+          status_code = 500,
+          headers = structure(
+            list(
+              Server = "nginx",
+              Date = "Wed, 02 Oct 2024 20:59:40 GMT",
+              `Content-Type` = "application/json",
+              `Content-Length` = "20",
+              Connection = "keep-alive"
+            ),
+            class = "httr2_headers"
+          ),
+          # Use invalid raw data to simulate an unreadable body
+          body = as.raw(c(0xFF, 0xFE, 0xFD)),  # Invalid UTF-8 sequence
+          cache = new.env()
+        ),
+        class = "httr2_response"
+      ),
+      message = "Legacy error with undecodable body"
+    ),
+    class = "error"
+  )
+
+  # Mock `resp_body_string` to throw an error for the legacy structure
+  expect_message(
+    with_mocked_bindings(
+      resp_body_string = function(resp) {
+        if (inherits(resp, "httr2_response")) stop("Failed to decode response body")
+      },
+      {
+        handle_http_error(legacy_error_with_unreadable_body)
+      },
+      .package = "httr2"
+    ),
+    regexp = "<Unable to decode response body>"
+  )
+})
+

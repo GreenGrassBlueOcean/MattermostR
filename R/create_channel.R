@@ -62,11 +62,5 @@ create_channel <- function(team_id = NULL, name = NULL, display_name = NULL, typ
   return(response)
 }
 
-# Compact error checking for required parameters
-check_not_null <- function(param, param_name) {
-  if (is.null(param) || !nzchar(param)) {
-    stop(paste(param_name, "cannot be empty or NULL"))
-  }
-}
 
 

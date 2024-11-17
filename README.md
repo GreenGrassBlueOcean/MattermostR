@@ -59,7 +59,41 @@ response <- send_mattermost_message(
 )
 ```
 
-### 3. Manage Teams and Channels
+### 3. Send Plots as Attachments
+
+You can now directly send plots as attachments to your Mattermost
+messages. Supported plot types include:
+
+- ggplot2 objects
+- R expressions (e.g., quote(plot(cars)))
+- Functions that generate plots (e.g., function() plot(cars))
+
+The plots are automatically saved as .png files and uploaded to the
+Mattermost server.
+
+Example:
+
+``` r
+# Define some plots
+library(ggplot2)
+
+plot1 <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+plot2 <- function() plot(cars)
+
+# Send a message with plot attachments
+response <- send_mattermost_message(
+  channel_id = channel_id,
+  message = "Here are some plots!",
+  plots = list(plot1, plot2),
+  plot_name = c("scatterplot.png", "lineplot"),
+  verbose = TRUE,
+  auth = auth
+)
+```
+
+### 4. Manage Teams and Channels
 
 The package provides tools for managing channels and teams:
 
@@ -70,7 +104,7 @@ team.
 4.Look Up Channels by Name: Find a specific channel by name and get its
 ID.
 
-### 4. Authentication
+### 5. Authentication
 
 Authenticate with the Mattermost API using a bearer token or by
 providing your username and password. Once authenticated, the token is
@@ -83,7 +117,7 @@ auth <- authenticate_mattermost(
 )
 ```
 
-### 5. Error Handling and Validation
+### 6. Error Handling and Validation
 
 Priority Validation: Before sending a message, the priority is validated
 to ensure that it’s one of Normal, High, or Low. If an invalid priority
@@ -136,8 +170,6 @@ delete_mattermost_channel(channel_id = "your-channel-id")
 ## Roadmap
 
 Add more Mattermost API endpoints for team and user management.
-Implement message threading support. Add more unit tests for edge cases
-and advanced API features.
 
 ## License
 
