@@ -29,7 +29,7 @@
 #' - The function enforces a maximum of 5 total attachments (files + plots). Attempting to attach more will result in an error.
 #' - Plot attachments are handled by the `handle_plot_attachments` helper function, which processes and uploads plots, returning their respective file IDs.
 #' - Priority levels can influence how messages are displayed or handled within Mattermost, depending on server configurations.
-#'
+#' @export
 #' @examples
 #' \dontrun{
 #' # Define channel ID and message
