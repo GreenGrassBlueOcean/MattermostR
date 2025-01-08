@@ -212,7 +212,7 @@ If multiple plots are provided with a single name, numbered names will be genera
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Example 6: Combine all plot possibilities and a file attachment</span></span></span>
 <span class="r-in"><span><span class="co">#Define additional plot using the `quote()` function.</span></span></span>
-<span class="r-in"><span><span class="va">plot3</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mpg</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">plot3</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/r/base/substitute.html" class="external-link">quote</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="va"><a href="https://ggplot2.tidyverse.org/reference/mpg.html" class="external-link">mpg</a></span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Attempt to send 4 attachments (1 file + 3 plots)</span></span></span>
 <span class="r-in"><span><span class="va">response6</span> <span class="op">&lt;-</span> <span class="fu">send_mattermost_message</span><span class="op">(</span></span></span>
