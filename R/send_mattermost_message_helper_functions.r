@@ -43,6 +43,8 @@ validate_plots <- function(plots, plot_name) {
     base_name <- tools::file_path_sans_ext(plot_name)
     ext <- tools::file_ext(plot_name)
     plot_name <- paste0(base_name, seq_along(plots), ".", ifelse(ext == "", "png", ext))
+  } else if(length(plot_name) == 0 && length(plots) > 0){
+    plot_name <- paste0("plot", seq_along(plots), ".png")
   }
 
   # Debugging: Log generated names
@@ -234,7 +236,7 @@ handle_plot_attachments <- function(plots, plot_name, channel_id, comment = NULL
   )
 
   # Convert list of plot_files to a character vector
-  plot_files_vector <- unlist(plot_files)
+  plot_files_vector <- unname(unlist(plot_files))
 
   # Upload plot files and collect file_ids
   plot_file_ids <- upload_files(

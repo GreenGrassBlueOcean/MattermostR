@@ -117,7 +117,7 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
 #' @return The response object if the content type is JSON, or a warning if it's not.
 handle_response_content <- function(response, verbose = FALSE) {
 
-   # Safely retrieve content type with tryCatch
+  # Safely retrieve content type with tryCatch
   content_type <- tryCatch({
     httr2::resp_content_type(response)
   }, error = function(e) {

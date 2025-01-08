@@ -156,7 +156,7 @@ print(response5)
 
 # Example 6: Combine all plot possibilities and a file attachment
 #Define additional plot using the `quote()` function.
-plot3 <-  quote(plot(mpg))
+plot3 <-  quote(plot(ggplot2::mpg))
 
 # Attempt to send 4 attachments (1 file + 3 plots)
 response6 <- send_mattermost_message(
