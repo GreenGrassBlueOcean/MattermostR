@@ -1,6 +1,6 @@
 Package: MattermostR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: MattermostR: Seamless Integration with the Mattermost API for Messaging and File Management
 Version: 0.1.0
 Author: Laurens van der Burg
 Maintainer: Laurens van der Burg <laurens@ggbo.eu>
