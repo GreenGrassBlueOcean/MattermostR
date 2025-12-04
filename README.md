@@ -104,7 +104,53 @@ team.
 4.Look Up Channels by Name: Find a specific channel by name and get its
 ID.
 
-### 5. Authentication
+### 5. Search Posts
+
+Robust search functionality allows you to query message history. This
+includes:
+
+1.Filtering by Team, Channel, or User.  
+2.Date range filtering (before/after).  
+3.Handling pagination and integer overflow for large datasets.
+
+Note: The API usually requires the bot/user to be a member of the
+channel to search it.
+
+``` r
+# 1. Authenticate
+auth <- authenticate_mattermost(
+  base_url = "https://yourmattermost.stackhero-network.com", 
+  token = "your-token"
+)
+
+# 2. Get your user ID (for joining channels) and Team ID
+me <- get_user_info("me", auth = auth)
+teams <- get_all_teams(auth = auth)
+team_id <- teams$id[1] # Select the first team
+
+# 3. Find a channel and ensure the bot is a member
+# (Search often fails if the bot hasn't explicitly joined the channel)
+channels <- get_team_channels(team_id = team_id, auth = auth)
+channel_id <- get_channel_id_lookup(channels, name = "town-square")
+
+add_user_to_channel(channel_id, me$id, auth = auth)
+
+# 4. Perform the Search
+results <- search_posts(
+  terms = "important update",
+  team_id = team_id,
+  in_channels = channel_id,
+  after_date = "2024-01-01",
+  per_page = 100,
+  verbose = TRUE,
+  auth = auth
+)
+
+# View results
+head(results)
+```
+
+### 6. Authentication
 
 Authenticate with the Mattermost API using a bearer token or by
 providing your username and password. Once authenticated, the token is
@@ -117,7 +163,7 @@ auth <- authenticate_mattermost(
 )
 ```
 
-### 6. Error Handling and Validation
+### 7. Error Handling and Validation
 
 Priority Validation: Before sending a message, the priority is validated
 to ensure that it’s one of Normal, High, or Low. If an invalid priority
@@ -166,10 +212,6 @@ create_mattermost_channel(team_id = "your-team-id", channel_name = "new-channel"
 # Delete a channel
 delete_mattermost_channel(channel_id = "your-channel-id")
 ```
-
-## Roadmap
-
-Add more Mattermost API endpoints for team and user management.
 
 ## License
 

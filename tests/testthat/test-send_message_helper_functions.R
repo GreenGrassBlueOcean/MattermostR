@@ -383,4 +383,25 @@ test_that("upload_files throws an error for unexpected file response format", {
   unlink(temp_file)
 })
 
+test_that("validate_plots generates default numbered names when plot_name is empty or NULL", {
+  # Setup: Create a list of 2 dummy plots
+  # We use simple ggplots to satisfy input requirements
+  plots <- list(
+    ggplot2::ggplot(data.frame(x = 1), ggplot2::aes(x = x, y = x)) + ggplot2::geom_point(),
+    ggplot2::ggplot(data.frame(x = 1), ggplot2::aes(x = x, y = x)) + ggplot2::geom_point()
+  )
 
+  # Case 1: Test when plot_name is NULL (length 0)
+  # This triggers the `else if(length(plot_name) == 0 && length(plots) > 0)` block
+  result_null <- validate_plots(plots, NULL)
+
+  # Expect names to be generated as "plot1.png", "plot2.png"
+  expect_equal(length(result_null$plot_name), 2)
+  expect_equal(result_null$plot_name, c("plot1.png", "plot2.png"))
+
+  # Case 2: Test when plot_name is an empty character vector (length 0)
+  result_empty <- validate_plots(plots, character(0))
+
+  # Expect same default behavior
+  expect_equal(result_empty$plot_name, c("plot1.png", "plot2.png"))
+})

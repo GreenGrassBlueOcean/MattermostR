@@ -7,19 +7,26 @@
 get_user_info(user_id = NULL, auth = authenticate_mattermost())
 }
 \arguments{
-\item{user_id}{The Mattermost user ID.}
+\item{user_id}{A character string containing the Mattermost user ID.
+You can also use the special string **"me"** to retrieve information
+about the currently authenticated user (the bot/user associated with the token).}
 
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
 \value{
-Parsed JSON response with user information.
+Parsed JSON response with user information (list).
 }
 \description{
-Get information about a specific Mattermost user
+Retrieve detailed information about a user, such as their username, email,
+roles, and ID.
 }
 \examples{
 \dontrun{
-users <- get_all_users()
-userinfo <- lapply(users, get_user_info)
+  # Get info about a specific user by ID
+  user <- get_user_info("xb123abc456...")
+
+  # Get info about the current authenticated bot/user
+  myself <- get_user_info("me")
+  print(myself$id)
 }
 }

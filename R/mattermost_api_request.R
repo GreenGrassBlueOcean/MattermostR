@@ -1,5 +1,3 @@
-# File: R/mattermost_api_request.R
-
 #' Make a Mattermost API Request
 #'
 #' This function sends an HTTP request to the Mattermost API using authentication details,
@@ -51,7 +49,9 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
   # Add the body if provided
   if (!is.null(body)) {
     if (multipart) {
-      req <- httr2::req_body_multipart(req, body)
+      # Use do.call to splice the body list into named arguments for req_body_multipart
+      # This effectively does: req_body_multipart(req, file = "path", ...)
+      req <- do.call(httr2::req_body_multipart, c(list(.req = req), body))
     } else {
       req <- httr2::req_body_json(req, body)
     }
@@ -176,4 +176,3 @@ handle_response_content <- function(response, verbose = FALSE) {
 
   return(NULL)
 }
-
