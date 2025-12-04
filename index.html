@@ -129,17 +129,58 @@
 4.Look Up Channels by Name: Find a specific channel by name and get its ID.</p>
 </div>
 <div class="section level3">
-<h3 id="id_5-authentication">5. Authentication<a class="anchor" aria-label="anchor" href="#id_5-authentication"></a>
+<h3 id="id_5-search-posts">5. Search Posts<a class="anchor" aria-label="anchor" href="#id_5-search-posts"></a>
+</h3>
+<p>Robust search functionality allows you to query message history. This includes:</p>
+<p>1.Filtering by Team, Channel, or User.<br>
+2.Date range filtering (before/after).<br>
+3.Handling pagination and integer overflow for large datasets.</p>
+<p>Note: The API usually requires the bot/user to be a member of the channel to search it.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># 1. Authenticate</span></span>
+<span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span></span>
+<span>  base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, </span>
+<span>  token <span class="op">=</span> <span class="st">"your-token"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Get your user ID (for joining channels) and Team ID</span></span>
+<span><span class="va">me</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_user_info.html">get_user_info</a></span><span class="op">(</span><span class="st">"me"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_all_teams.html">get_all_teams</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">team_id</span> <span class="op">&lt;-</span> <span class="va">teams</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="co"># Select the first team</span></span>
+<span></span>
+<span><span class="co"># 3. Find a channel and ensure the bot is a member</span></span>
+<span><span class="co"># (Search often fails if the bot hasn't explicitly joined the channel)</span></span>
+<span><span class="va">channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="va">team_id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">channel_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_channel_id_lookup.html">get_channel_id_lookup</a></span><span class="op">(</span><span class="va">channels</span>, name <span class="op">=</span> <span class="st">"town-square"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/add_user_to_channel.html">add_user_to_channel</a></span><span class="op">(</span><span class="va">channel_id</span>, <span class="va">me</span><span class="op">$</span><span class="va">id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 4. Perform the Search</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/search_posts.html">search_posts</a></span><span class="op">(</span></span>
+<span>  terms <span class="op">=</span> <span class="st">"important update"</span>,</span>
+<span>  team_id <span class="op">=</span> <span class="va">team_id</span>,</span>
+<span>  in_channels <span class="op">=</span> <span class="va">channel_id</span>,</span>
+<span>  after_date <span class="op">=</span> <span class="st">"2024-01-01"</span>,</span>
+<span>  per_page <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  auth <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># View results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="id_6-authentication">6. Authentication<a class="anchor" aria-label="anchor" href="#id_6-authentication"></a>
 </h3>
 <p>Authenticate with the Mattermost API using a bearer token or by providing your username and password. Once authenticated, the token is stored for future API calls.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span></span>
 <span>  base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, </span>
 <span>  token <span class="op">=</span> <span class="st">"your-token"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_6-error-handling-and-validation">6. Error Handling and Validation<a class="anchor" aria-label="anchor" href="#id_6-error-handling-and-validation"></a>
+<h3 id="id_7-error-handling-and-validation">7. Error Handling and Validation<a class="anchor" aria-label="anchor" href="#id_7-error-handling-and-validation"></a>
 </h3>
 <p>Priority Validation: Before sending a message, the priority is validated to ensure that it’s one of Normal, High, or Low. If an invalid priority is provided, the function will return an error. Input Validation: Ensures that required fields (such as channel_id and message) are provided before making API calls.</p>
 </div>
@@ -150,7 +191,7 @@
 <div class="section level3">
 <h3 id="sending-a-message">Sending a Message<a class="anchor" aria-label="anchor" href="#sending-a-message"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Authenticate</span></span>
 <span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span>base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, token <span class="op">=</span> <span class="st">"your-token"</span><span class="op">)</span></span>
 <span></span>
@@ -165,7 +206,7 @@
 <div class="section level3">
 <h3 id="sending-a-message-with-a-file">Sending a Message with a File<a class="anchor" aria-label="anchor" href="#sending-a-message-with-a-file"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Send a message with a file attachment</span></span>
 <span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
 <span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>, </span>
@@ -177,7 +218,7 @@
 <div class="section level3">
 <h3 id="managing-channels">Managing Channels<a class="anchor" aria-label="anchor" href="#managing-channels"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># List all channels in a team</span></span>
 <span><span class="va">channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span><span class="op">)</span></span>
 <span></span>
@@ -187,11 +228,6 @@
 <span><span class="co"># Delete a channel</span></span>
 <span><span class="fu">delete_mattermost_channel</span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span><span class="op">)</span></span></code></pre></div>
 </div>
-</div>
-<div class="section level2">
-<h2 id="roadmap">Roadmap<a class="anchor" aria-label="anchor" href="#roadmap"></a>
-</h2>
-<p>Add more Mattermost API endpoints for team and user management.</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
@@ -219,7 +255,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Laurens van der Burg <br><small class="roles"> Maintainer </small>  </li>
+<li>Laurens van der Burg <br><small class="roles"> Maintainer </small>   </li>
 </ul>
 </div>
 
@@ -240,7 +276,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

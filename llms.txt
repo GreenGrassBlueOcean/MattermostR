@@ -1,0 +1,262 @@
+# MattermostR [![MattermostR website](reference/figures/MattermostR_hex.png)](https://github.com/GreenGrassBlueOcean/MattermostR)
+
+# MattermostR
+
+MattermostR is an R package designed to interact with the Mattermost API
+for sending messages, managing channels, uploading files, and more. The
+package includes functionality for automating interactions with
+Mattermost from R scripts, allowing you to easily send messages, upload
+attachments, and manage teams and channels.
+
+## Installation
+
+You can install the MattermostR package from GitHub:
+
+``` r
+# Install the devtools package if you don't have it already
+install.packages("devtools")
+
+# Install MattermostR
+devtools::install_github("GreenGrassBlueOcean/MattermostR")
+```
+
+## Features
+
+### 1. Send Messages with Priority
+
+Send messages to Mattermost channels with optional priorities: -
+**Normal** - **High** - **Low**
+
+The priority is automatically normalized in the
+[`send_mattermost_message()`](https://greengrassblueocean.github.io/MattermostR/reference/send_mattermost_message.md)
+function, so you don’t need to worry about case sensitivity (e.g.,
+`high`, `HIGH`, and `High` are all valid).
+
+### 2. Attach Files to Messages
+
+You can attach files to your messages by specifying a file path. The
+file is first uploaded to the Mattermost server, and its file ID is
+included in the message.
+
+Example:
+
+``` r
+response <- send_mattermost_message(
+  channel_id = channel_id, 
+  message = "Here is your file!", 
+  file_path = "output.txt", 
+  verbose = TRUE
+)
+```
+
+### 3. Send Plots as Attachments
+
+You can now directly send plots as attachments to your Mattermost
+messages. Supported plot types include:
+
+- ggplot2 objects
+- R expressions (e.g., quote(plot(cars)))
+- Functions that generate plots (e.g., function() plot(cars))
+
+The plots are automatically saved as .png files and uploaded to the
+Mattermost server.
+
+Example:
+
+``` r
+# Define some plots
+library(ggplot2)
+
+plot1 <- ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+plot2 <- function() plot(cars)
+
+# Send a message with plot attachments
+response <- send_mattermost_message(
+  channel_id = channel_id,
+  message = "Here are some plots!",
+  plots = list(plot1, plot2),
+  plot_name = c("scatterplot.png", "lineplot"),
+  verbose = TRUE,
+  auth = auth
+)
+```
+
+### 4. Manage Teams and Channels
+
+The package provides tools for managing channels and teams:
+
+1.List Channels and Groups: Retrieve all channels and groups from a
+team.  
+2.Create Channels: Programmatically create new channels in a team.  
+3.Delete Channels: Delete existing channels.  
+4.Look Up Channels by Name: Find a specific channel by name and get its
+ID.
+
+### 5. Search Posts
+
+Robust search functionality allows you to query message history. This
+includes:
+
+1.Filtering by Team, Channel, or User.  
+2.Date range filtering (before/after).  
+3.Handling pagination and integer overflow for large datasets.
+
+Note: The API usually requires the bot/user to be a member of the
+channel to search it.
+
+``` r
+# 1. Authenticate
+auth <- authenticate_mattermost(
+  base_url = "https://yourmattermost.stackhero-network.com", 
+  token = "your-token"
+)
+
+# 2. Get your user ID (for joining channels) and Team ID
+me <- get_user_info("me", auth = auth)
+teams <- get_all_teams(auth = auth)
+team_id <- teams$id[1] # Select the first team
+
+# 3. Find a channel and ensure the bot is a member
+# (Search often fails if the bot hasn't explicitly joined the channel)
+channels <- get_team_channels(team_id = team_id, auth = auth)
+channel_id <- get_channel_id_lookup(channels, name = "town-square")
+
+add_user_to_channel(channel_id, me$id, auth = auth)
+
+# 4. Perform the Search
+results <- search_posts(
+  terms = "important update",
+  team_id = team_id,
+  in_channels = channel_id,
+  after_date = "2024-01-01",
+  per_page = 100,
+  verbose = TRUE,
+  auth = auth
+)
+
+# View results
+head(results)
+```
+
+### 6. Authentication
+
+Authenticate with the Mattermost API using a bearer token or by
+providing your username and password. Once authenticated, the token is
+stored for future API calls.
+
+``` r
+auth <- authenticate_mattermost(
+  base_url = "https://yourmattermost.stackhero-network.com", 
+  token = "your-token"
+)
+```
+
+### 7. Error Handling and Validation
+
+Priority Validation: Before sending a message, the priority is validated
+to ensure that it’s one of Normal, High, or Low. If an invalid priority
+is provided, the function will return an error. Input Validation:
+Ensures that required fields (such as channel_id and message) are
+provided before making API calls.
+
+## Usage
+
+### Sending a Message
+
+``` r
+# Authenticate
+auth <- authenticate_mattermost(base_url = "https://yourmattermost.stackhero-network.com", token = "your-token")
+
+# Send a message to a channel
+response <- send_mattermost_message(
+  channel_id = "your-channel-id", 
+  message = "Hello, Mattermost!", 
+  priority = "High", 
+  verbose = TRUE
+)
+```
+
+### Sending a Message with a File
+
+``` r
+# Send a message with a file attachment
+response <- send_mattermost_message(
+  channel_id = "your-channel-id", 
+  message = "Here is a file attachment", 
+  file_path = "path/to/file.txt", 
+  verbose = TRUE
+)
+```
+
+### Managing Channels
+
+``` r
+# List all channels in a team
+channels <- get_team_channels(team_id = "your-team-id")
+
+# Create a new channel
+create_mattermost_channel(team_id = "your-team-id", channel_name = "new-channel", channel_display_name = "New Channel")
+
+# Delete a channel
+delete_mattermost_channel(channel_id = "your-channel-id")
+```
+
+## License
+
+This project is licensed under the MIT License.
+
+# Package index
+
+## All functions
+
+- [`add_user_to_channel()`](https://greengrassblueocean.github.io/MattermostR/reference/add_user_to_channel.md)
+  : Add a user to a channel
+- [`authenticate_mattermost()`](https://greengrassblueocean.github.io/MattermostR/reference/authenticate_mattermost.md)
+  : Authenticate with Mattermost API
+- [`check_mattermost_auth()`](https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_auth.md)
+  : Check if the object is a valid mattermost_auth object
+- [`check_mattermost_status()`](https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_status.md)
+  : Check if the Mattermost server is online
+- [`create_channel()`](https://greengrassblueocean.github.io/MattermostR/reference/create_channel.md)
+  : Create a new Mattermost channel
+- [`delete_channel()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_channel.md)
+  : Delete a Mattermost channel
+- [`delete_old_messages()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_old_messages.md)
+  : Delete Messages Older Than X Days in a Mattermost Channel
+- [`delete_post()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_post.md)
+  : Delete a specific post in Mattermost
+- [`get_all_teams()`](https://greengrassblueocean.github.io/MattermostR/reference/get_all_teams.md)
+  : List all teams in Mattermost
+- [`get_all_users()`](https://greengrassblueocean.github.io/MattermostR/reference/get_all_users.md)
+  : Get information about a specific Mattermost user
+- [`get_channel_id_lookup()`](https://greengrassblueocean.github.io/MattermostR/reference/get_channel_id_lookup.md)
+  : Get Channel ID by Display Name or Name
+- [`get_channel_info()`](https://greengrassblueocean.github.io/MattermostR/reference/get_channel_info.md)
+  : Get information about a Mattermost channel
+- [`get_channel_posts()`](https://greengrassblueocean.github.io/MattermostR/reference/get_channel_posts.md)
+  : Get posts from a Mattermost channel
+- [`get_mattermost_file()`](https://greengrassblueocean.github.io/MattermostR/reference/get_mattermost_file.md)
+  : Retrieve a file from Mattermost
+- [`get_me()`](https://greengrassblueocean.github.io/MattermostR/reference/get_me.md)
+  : Get information about which user is belonging to bearer key,
+- [`get_team()`](https://greengrassblueocean.github.io/MattermostR/reference/get_team.md)
+  : Get data of a single team from its team_id
+- [`get_team_channels()`](https://greengrassblueocean.github.io/MattermostR/reference/get_team_channels.md)
+  : Get the list of channels for a team
+- [`get_user()`](https://greengrassblueocean.github.io/MattermostR/reference/get_user.md)
+  : Get information about a specific Mattermost user
+- [`get_user_info()`](https://greengrassblueocean.github.io/MattermostR/reference/get_user_info.md)
+  : Get information about a specific Mattermost user
+- [`handle_response_content()`](https://greengrassblueocean.github.io/MattermostR/reference/handle_response_content.md)
+  : Handle the content of the response
+- [`mattermost_api_request()`](https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.md)
+  : Make a Mattermost API Request
+- [`normalize_priority()`](https://greengrassblueocean.github.io/MattermostR/reference/normalize_priority.md)
+  : Normalize the priority input
+- [`search_posts()`](https://greengrassblueocean.github.io/MattermostR/reference/search_posts.md)
+  : Search for posts in Mattermost
+- [`send_mattermost_message()`](https://greengrassblueocean.github.io/MattermostR/reference/send_mattermost_message.md)
+  : Send a Message to a Mattermost Channel with Optional Attachments
+

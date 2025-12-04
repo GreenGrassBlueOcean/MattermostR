@@ -4,6 +4,7 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/LICENSE.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/authors.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/index.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/add_user_to_channel.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/authenticate_mattermost.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_auth.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_status.html</loc></url>
@@ -26,6 +27,7 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/index.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/normalize_priority.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/search_posts.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/send_mattermost_message.html</loc></url>
 </urlset>
 
