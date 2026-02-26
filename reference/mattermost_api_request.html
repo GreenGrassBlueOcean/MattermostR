@@ -11,7 +11,7 @@ failed requests and supports both regular JSON requests and multipart file uploa
 
     <a class="navbar-brand me-2" href="../index.html">MattermostR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@ failed requests and supports both regular JSON requests and multipart file uploa
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -83,7 +84,31 @@ failed requests and supports both regular JSON requests and multipart file uploa
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>The content of the response, usually parsed as JSON, or an error message if the request fails.</p>
+    <p>The content of the response, usually parsed as JSON. On error, raises a
+  <code>mattermost_error</code> condition (default) or returns <code>NULL</code> (legacy mode).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="rate-limiting">Rate Limiting<a class="anchor" aria-label="anchor" href="#rate-limiting"></a></h2>
+
+
+<p>Requests are proactively throttled via <code><a href="https://httr2.r-lib.org/reference/req_throttle.html" class="external-link">httr2::req_throttle()</a></code> at a rate
+controlled by <code>getOption("MattermostR.rate_limit", 10)</code> requests per second.
+Set to <code>Inf</code> to disable throttling. The default of 10 matches
+Mattermost's out-of-the-box server setting (configurable in System Console).</p>
+<p>If the server returns HTTP 429 (Too Many Requests), the retry logic reads the
+<code>X-Ratelimit-Reset</code> header to wait exactly the right number of seconds
+before retrying.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a></h2>
+
+
+<p>By default, HTTP errors and connection failures raise a <code>mattermost_error</code>
+condition (an S3 error class) that can be caught with
+<code>tryCatch(..., mattermost_error = function(e) ...)</code>.</p>
+<p>Set <code>options(MattermostR.on_error = "message")</code> to revert to the legacy
+behaviour where errors are emitted via <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code> and the function
+returns <code>NULL</code>.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

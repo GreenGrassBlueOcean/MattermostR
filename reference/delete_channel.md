@@ -5,12 +5,7 @@ Archives a Mattermost channel.
 ## Usage
 
 ``` r
-delete_channel(
-  channel_id,
-  team_id,
-  verbose = FALSE,
-  auth = authenticate_mattermost()
-)
+delete_channel(channel_id, team_id, verbose = FALSE, auth = get_default_auth())
 ```
 
 ## Arguments
@@ -34,7 +29,7 @@ delete_channel(
 
 ## Value
 
-A list with details about the deletion status.
+A named list with the deletion status as returned by the Mattermost API.
 
 ## Details
 

@@ -5,7 +5,7 @@ This function retrieves a file from Mattermost based on its file ID.
 ## Usage
 
 ``` r
-get_mattermost_file(file_id, auth = authenticate_mattermost())
+get_mattermost_file(file_id, auth = get_default_auth())
 ```
 
 ## Arguments
@@ -16,11 +16,13 @@ get_mattermost_file(file_id, auth = authenticate_mattermost())
 
 - auth:
 
-  A list containing \`base_url\` and \`headers\` for authentication.
+  The authentication object created by \[authenticate_mattermost()\].
 
 ## Value
 
-The response from the Mattermost API, which may contain the file data.
+The file contents as returned by the Mattermost API. The exact type
+depends on the file's content type (typically raw bytes or a character
+string).
 
 ## Examples
 

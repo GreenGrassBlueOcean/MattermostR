@@ -5,27 +5,28 @@ Get data of a single team from its team_id
 ## Usage
 
 ``` r
-get_team(team_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
+get_team(team_id = NULL, verbose = FALSE, auth = get_default_auth())
 ```
 
 ## Arguments
 
 - team_id:
 
-  The ID of the Mattermost team.
+  A character string containing the Mattermost team ID.
 
 - verbose:
 
   (Logical) If \`TRUE\`, detailed information about the request and
-  response will be printed.
+  response will be printed. Default is \`FALSE\`.
 
 - auth:
 
-  A list containing \`base_url\` and \`headers\` for authentication.
+  The authentication object created by \[authenticate_mattermost()\].
 
 ## Value
 
-A data frame containing details of a team.
+A named list with team fields returned by the Mattermost API (e.g.
+\`id\`, \`display_name\`, \`name\`, \`type\`).
 
 ## Examples
 

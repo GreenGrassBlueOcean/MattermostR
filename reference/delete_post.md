@@ -5,7 +5,7 @@ Delete a specific post in Mattermost
 ## Usage
 
 ``` r
-delete_post(post_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
+delete_post(post_id = NULL, verbose = FALSE, auth = get_default_auth())
 ```
 
 ## Arguments
@@ -25,7 +25,7 @@ delete_post(post_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
 
 ## Value
 
-Parsed JSON response confirming deletion.
+A named list with the deletion status as returned by the Mattermost API.
 
 ## Examples
 

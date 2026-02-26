@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">MattermostR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -51,191 +52,226 @@
 <!-- badges: start -->
 
 <!-- badges: end -->
-</div>
-<div class="section level1">
-<h1 id="mattermostr">MattermostR<a class="anchor" aria-label="anchor" href="#mattermostr"></a>
-</h1>
-<p>MattermostR is an R package designed to interact with the Mattermost API for sending messages, managing channels, uploading files, and more. The package includes functionality for automating interactions with Mattermost from R scripts, allowing you to easily send messages, upload attachments, and manage teams and channels.</p>
+<p>MattermostR is an R package for interacting with the <a href="https://api.mattermost.com/" class="external-link">Mattermost REST API v4</a>. It covers messaging, file management, channel and team administration, reactions, bots, slash commands, and more.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the MattermostR package from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Install the devtools package if you don't have it already</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Install MattermostR</span></span>
+<code class="sourceCode R"><span><span class="co"># Install from GitHub</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"GreenGrassBlueOcean/MattermostR"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+<h2 id="authentication">Authentication<a class="anchor" aria-label="anchor" href="#authentication"></a>
+</h2>
+<p>Authenticate with a bearer token (recommended) or username/password. Credentials are resolved from environment variables first, then R options.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Token-based (recommended)</span></span>
+<span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span></span>
+<span>  base_url <span class="op">=</span> <span class="st">"https://your-mattermost.example.com"</span>,</span>
+<span>  token    <span class="op">=</span> <span class="st">"your-token"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Or store credentials in environment variables to avoid passing auth everywhere:</span></span>
+<span><span class="co"># MATTERMOST_URL=https://your-mattermost.example.com</span></span>
+<span><span class="co"># MATTERMOST_TOKEN=your-token</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="sending-messages">Sending Messages<a class="anchor" aria-label="anchor" href="#sending-messages"></a>
 </h2>
 <div class="section level3">
-<h3 id="id_1-send-messages-with-priority">1. Send Messages with Priority<a class="anchor" aria-label="anchor" href="#id_1-send-messages-with-priority"></a>
+<h3 id="basic-message">Basic message<a class="anchor" aria-label="anchor" href="#basic-message"></a>
 </h3>
-<p>Send messages to Mattermost channels with optional priorities: - <strong>Normal</strong> - <strong>High</strong> - <strong>Low</strong></p>
-<p>The priority is automatically normalized in the <code><a href="reference/send_mattermost_message.html">send_mattermost_message()</a></code> function, so you don’t need to worry about case sensitivity (e.g., <code>high</code>, <code>HIGH</code>, and <code>High</code> are all valid).</p>
-</div>
-<div class="section level3">
-<h3 id="id_2-attach-files-to-messages">2. Attach Files to Messages<a class="anchor" aria-label="anchor" href="#id_2-attach-files-to-messages"></a>
-</h3>
-<p>You can attach files to your messages by specifying a file path. The file is first uploaded to the Mattermost server, and its file ID is included in the message.</p>
-<p>Example:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
-<span>  channel_id <span class="op">=</span> <span class="va">channel_id</span>, </span>
-<span>  message <span class="op">=</span> <span class="st">"Here is your file!"</span>, </span>
-<span>  file_path <span class="op">=</span> <span class="st">"output.txt"</span>, </span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_3-send-plots-as-attachments">3. Send Plots as Attachments<a class="anchor" aria-label="anchor" href="#id_3-send-plots-as-attachments"></a>
-</h3>
-<p>You can now directly send plots as attachments to your Mattermost messages. Supported plot types include:</p>
-<ul>
-<li>ggplot2 objects</li>
-<li>R expressions (e.g., quote(plot(cars)))</li>
-<li>Functions that generate plots (e.g., function() plot(cars))</li>
-</ul>
-<p>The plots are automatically saved as .png files and uploaded to the Mattermost server.</p>
-<p>Example:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define some plots</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">wt</span>, y <span class="op">=</span> <span class="va">mpg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">plot2</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Send a message with plot attachments</span></span>
-<span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
-<span>  channel_id <span class="op">=</span> <span class="va">channel_id</span>,</span>
-<span>  message <span class="op">=</span> <span class="st">"Here are some plots!"</span>,</span>
-<span>  plots <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">plot1</span>, <span class="va">plot2</span><span class="op">)</span>,</span>
-<span>  plot_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"scatterplot.png"</span>, <span class="st">"lineplot"</span><span class="op">)</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  auth <span class="op">=</span> <span class="va">auth</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
+<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  message    <span class="op">=</span> <span class="st">"Hello, Mattermost!"</span>,</span>
+<span>  auth       <span class="op">=</span> <span class="va">auth</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_4-manage-teams-and-channels">4. Manage Teams and Channels<a class="anchor" aria-label="anchor" href="#id_4-manage-teams-and-channels"></a>
+<h3 id="message-with-priority">Message with priority<a class="anchor" aria-label="anchor" href="#message-with-priority"></a>
 </h3>
-<p>The package provides tools for managing channels and teams:</p>
-<p>1.List Channels and Groups: Retrieve all channels and groups from a team.<br>
-2.Create Channels: Programmatically create new channels in a team.<br>
-3.Delete Channels: Delete existing channels.<br>
-4.Look Up Channels by Name: Find a specific channel by name and get its ID.</p>
-</div>
-<div class="section level3">
-<h3 id="id_5-search-posts">5. Search Posts<a class="anchor" aria-label="anchor" href="#id_5-search-posts"></a>
-</h3>
-<p>Robust search functionality allows you to query message history. This includes:</p>
-<p>1.Filtering by Team, Channel, or User.<br>
-2.Date range filtering (before/after).<br>
-3.Handling pagination and integer overflow for large datasets.</p>
-<p>Note: The API usually requires the bot/user to be a member of the channel to search it.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. Authenticate</span></span>
-<span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span></span>
-<span>  base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, </span>
-<span>  token <span class="op">=</span> <span class="st">"your-token"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 2. Get your user ID (for joining channels) and Team ID</span></span>
-<span><span class="va">me</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_user_info.html">get_user_info</a></span><span class="op">(</span><span class="st">"me"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
-<span><span class="va">teams</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_all_teams.html">get_all_teams</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
-<span><span class="va">team_id</span> <span class="op">&lt;-</span> <span class="va">teams</span><span class="op">$</span><span class="va">id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="co"># Select the first team</span></span>
-<span></span>
-<span><span class="co"># 3. Find a channel and ensure the bot is a member</span></span>
-<span><span class="co"># (Search often fails if the bot hasn't explicitly joined the channel)</span></span>
-<span><span class="va">channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="va">team_id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
-<span><span class="va">channel_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_channel_id_lookup.html">get_channel_id_lookup</a></span><span class="op">(</span><span class="va">channels</span>, name <span class="op">=</span> <span class="st">"town-square"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="reference/add_user_to_channel.html">add_user_to_channel</a></span><span class="op">(</span><span class="va">channel_id</span>, <span class="va">me</span><span class="op">$</span><span class="va">id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># 4. Perform the Search</span></span>
-<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/search_posts.html">search_posts</a></span><span class="op">(</span></span>
-<span>  terms <span class="op">=</span> <span class="st">"important update"</span>,</span>
-<span>  team_id <span class="op">=</span> <span class="va">team_id</span>,</span>
-<span>  in_channels <span class="op">=</span> <span class="va">channel_id</span>,</span>
-<span>  after_date <span class="op">=</span> <span class="st">"2024-01-01"</span>,</span>
-<span>  per_page <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  auth <span class="op">=</span> <span class="va">auth</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># View results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_6-authentication">6. Authentication<a class="anchor" aria-label="anchor" href="#id_6-authentication"></a>
-</h3>
-<p>Authenticate with the Mattermost API using a bearer token or by providing your username and password. Once authenticated, the token is stored for future API calls.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span></span>
-<span>  base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, </span>
-<span>  token <span class="op">=</span> <span class="st">"your-token"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
+<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  message    <span class="op">=</span> <span class="st">"Urgent update!"</span>,</span>
+<span>  priority   <span class="op">=</span> <span class="st">"Urgent"</span>,   <span class="co"># "Normal" (default), "Important", or "Urgent"</span></span>
+<span>  auth       <span class="op">=</span> <span class="va">auth</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="id_7-error-handling-and-validation">7. Error Handling and Validation<a class="anchor" aria-label="anchor" href="#id_7-error-handling-and-validation"></a>
+<h3 id="reply-in-a-thread">Reply in a thread<a class="anchor" aria-label="anchor" href="#reply-in-a-thread"></a>
 </h3>
-<p>Priority Validation: Before sending a message, the priority is validated to ensure that it’s one of Normal, High, or Low. If an invalid priority is provided, the function will return an error. Input Validation: Ensures that required fields (such as channel_id and message) are provided before making API calls.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
+<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  message    <span class="op">=</span> <span class="st">"This is a thread reply."</span>,</span>
+<span>  root_id    <span class="op">=</span> <span class="st">"parent-post-id"</span>,</span>
+<span>  auth       <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="attach-a-file-or-plot">Attach a file or plot<a class="anchor" aria-label="anchor" href="#attach-a-file-or-plot"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">wt</span>, <span class="va">mpg</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
+<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  message    <span class="op">=</span> <span class="st">"Here is the plot."</span>,</span>
+<span>  plots      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>,</span>
+<span>  auth       <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="incoming-webhooks-no-auth-required">Incoming webhooks (no auth required)<a class="anchor" aria-label="anchor" href="#incoming-webhooks-no-auth-required"></a>
+</h3>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/send_webhook_message.html">send_webhook_message</a></span><span class="op">(</span></span>
+<span>  webhook_url <span class="op">=</span> <span class="st">"https://your-mattermost.example.com/hooks/your-hook-id"</span>,</span>
+<span>  message     <span class="op">=</span> <span class="st">"Automated notification from R."</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="managing-posts">Managing Posts<a class="anchor" aria-label="anchor" href="#managing-posts"></a>
 </h2>
-<div class="section level3">
-<h3 id="sending-a-message">Sending a Message<a class="anchor" aria-label="anchor" href="#sending-a-message"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Authenticate</span></span>
-<span><span class="va">auth</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/authenticate_mattermost.html">authenticate_mattermost</a></span><span class="op">(</span>base_url <span class="op">=</span> <span class="st">"https://yourmattermost.stackhero-network.com"</span>, token <span class="op">=</span> <span class="st">"your-token"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Send a message to a channel</span></span>
-<span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
-<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>, </span>
-<span>  message <span class="op">=</span> <span class="st">"Hello, Mattermost!"</span>, </span>
-<span>  priority <span class="op">=</span> <span class="st">"High"</span>, </span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="sending-a-message-with-a-file">Sending a Message with a File<a class="anchor" aria-label="anchor" href="#sending-a-message-with-a-file"></a>
-</h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Send a message with a file attachment</span></span>
-<span><span class="va">response</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/send_mattermost_message.html">send_mattermost_message</a></span><span class="op">(</span></span>
-<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>, </span>
-<span>  message <span class="op">=</span> <span class="st">"Here is a file attachment"</span>, </span>
-<span>  file_path <span class="op">=</span> <span class="st">"path/to/file.txt"</span>, </span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="managing-channels">Managing Channels<a class="anchor" aria-label="anchor" href="#managing-channels"></a>
-</h3>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># List all channels in a team</span></span>
-<span><span class="va">channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Edit an existing post</span></span>
+<span><span class="fu"><a href="reference/update_post.html">update_post</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, message <span class="op">=</span> <span class="st">"Corrected text."</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create a new channel</span></span>
-<span><span class="fu">create_mattermost_channel</span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span>, channel_name <span class="op">=</span> <span class="st">"new-channel"</span>, channel_display_name <span class="op">=</span> <span class="st">"New Channel"</span><span class="op">)</span></span>
+<span><span class="co"># Delete a post</span></span>
+<span><span class="fu"><a href="reference/delete_post.html">delete_post</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Delete all posts in a channel older than a given date</span></span>
+<span><span class="fu"><a href="reference/delete_old_messages.html">delete_old_messages</a></span><span class="op">(</span></span>
+<span>  channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  before_date <span class="op">=</span> <span class="st">"2024-01-01"</span>,</span>
+<span>  auth <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="reactions--pins">Reactions &amp; Pins<a class="anchor" aria-label="anchor" href="#reactions--pins"></a>
+</h2>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Emoji reactions</span></span>
+<span><span class="fu"><a href="reference/add_reaction.html">add_reaction</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, emoji_name <span class="op">=</span> <span class="st">"thumbsup"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_reactions.html">get_reactions</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/remove_reaction.html">remove_reaction</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, emoji_name <span class="op">=</span> <span class="st">"thumbsup"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pin / unpin a post</span></span>
+<span><span class="fu"><a href="reference/pin_post.html">pin_post</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/unpin_post.html">unpin_post</a></span><span class="op">(</span>post_id <span class="op">=</span> <span class="st">"post-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="searching-and-retrieving-posts">Searching and Retrieving Posts<a class="anchor" aria-label="anchor" href="#searching-and-retrieving-posts"></a>
+</h2>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Retrieve posts from a channel (paginated)</span></span>
+<span><span class="va">posts</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_channel_posts.html">get_channel_posts</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Search message history</span></span>
+<span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/search_posts.html">search_posts</a></span><span class="op">(</span></span>
+<span>  terms       <span class="op">=</span> <span class="st">"important update"</span>,</span>
+<span>  team_id     <span class="op">=</span> <span class="st">"your-team-id"</span>,</span>
+<span>  in_channels <span class="op">=</span> <span class="st">"your-channel-id"</span>,</span>
+<span>  after_date  <span class="op">=</span> <span class="st">"2024-01-01"</span>,</span>
+<span>  auth        <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="managing-channels">Managing Channels<a class="anchor" aria-label="anchor" href="#managing-channels"></a>
+</h2>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># List channels in a team</span></span>
+<span><span class="va">channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team_channels.html">get_team_channels</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Look up a channel ID by name</span></span>
+<span><span class="va">channel_id</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_channel_id_lookup.html">get_channel_id_lookup</a></span><span class="op">(</span><span class="va">channels</span>, name <span class="op">=</span> <span class="st">"town-square"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Create channels</span></span>
+<span><span class="fu"><a href="reference/create_channel.html">create_channel</a></span><span class="op">(</span></span>
+<span>  team_id      <span class="op">=</span> <span class="st">"your-team-id"</span>,</span>
+<span>  name         <span class="op">=</span> <span class="st">"new-channel"</span>,</span>
+<span>  display_name <span class="op">=</span> <span class="st">"New Channel"</span>,</span>
+<span>  auth         <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Direct message or group message channel</span></span>
+<span><span class="fu"><a href="reference/create_direct_channel.html">create_direct_channel</a></span><span class="op">(</span>user_ids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"user-id-1"</span>, <span class="st">"user-id-2"</span><span class="op">)</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Delete a channel</span></span>
-<span><span class="fu">delete_mattermost_channel</span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"your-channel-id"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="reference/delete_channel.html">delete_channel</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"channel-id"</span>, team_id <span class="op">=</span> <span class="st">"your-team-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Channel membership</span></span>
+<span><span class="fu"><a href="reference/add_user_to_channel.html">add_user_to_channel</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"channel-id"</span>, user_id <span class="op">=</span> <span class="st">"user-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/add_users_to_channel.html">add_users_to_channel</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"channel-id"</span>, user_ids <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"uid1"</span>, <span class="st">"uid2"</span><span class="op">)</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_channel_members.html">get_channel_members</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"channel-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/remove_channel_member.html">remove_channel_member</a></span><span class="op">(</span>channel_id <span class="op">=</span> <span class="st">"channel-id"</span>, user_id <span class="op">=</span> <span class="st">"user-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
 </div>
+<div class="section level2">
+<h2 id="teams-and-users">Teams and Users<a class="anchor" aria-label="anchor" href="#teams-and-users"></a>
+</h2>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Teams</span></span>
+<span><span class="va">teams</span>   <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_all_teams.html">get_all_teams</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">team</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_team.html">get_team</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Users</span></span>
+<span><span class="va">me</span>      <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_me.html">get_me</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">user</span>    <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_user.html">get_user</a></span><span class="op">(</span>user_id <span class="op">=</span> <span class="st">"user-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="va">all_users</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_all_users.html">get_all_users</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># User status</span></span>
+<span><span class="fu"><a href="reference/get_user_status.html">get_user_status</a></span><span class="op">(</span>user_id <span class="op">=</span> <span class="st">"user-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/set_user_status.html">set_user_status</a></span><span class="op">(</span>user_id <span class="op">=</span> <span class="st">"user-id"</span>, status <span class="op">=</span> <span class="st">"away"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="files">Files<a class="anchor" aria-label="anchor" href="#files"></a>
+</h2>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Download a file</span></span>
+<span><span class="fu"><a href="reference/get_mattermost_file.html">get_mattermost_file</a></span><span class="op">(</span>file_id <span class="op">=</span> <span class="st">"file-id"</span>, dest_path <span class="op">=</span> <span class="st">"local/file.png"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="bots">Bots<a class="anchor" aria-label="anchor" href="#bots"></a>
+</h2>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">bot</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_bot.html">create_bot</a></span><span class="op">(</span>username <span class="op">=</span> <span class="st">"mybot"</span>, display_name <span class="op">=</span> <span class="st">"My Bot"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/get_bots.html">get_bots</a></span><span class="op">(</span>auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/disable_bot.html">disable_bot</a></span><span class="op">(</span>bot_user_id <span class="op">=</span> <span class="va">bot</span><span class="op">$</span><span class="va">user_id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/enable_bot.html">enable_bot</a></span><span class="op">(</span>bot_user_id <span class="op">=</span> <span class="va">bot</span><span class="op">$</span><span class="va">user_id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="slash-commands">Slash Commands<a class="anchor" aria-label="anchor" href="#slash-commands"></a>
+</h2>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cmd</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/create_command.html">create_command</a></span><span class="op">(</span></span>
+<span>  team_id      <span class="op">=</span> <span class="st">"your-team-id"</span>,</span>
+<span>  trigger      <span class="op">=</span> <span class="st">"remind"</span>,</span>
+<span>  url          <span class="op">=</span> <span class="st">"https://your-handler.example.com/remind"</span>,</span>
+<span>  display_name <span class="op">=</span> <span class="st">"Remind"</span>,</span>
+<span>  auth         <span class="op">=</span> <span class="va">auth</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/list_commands.html">list_commands</a></span><span class="op">(</span>team_id <span class="op">=</span> <span class="st">"your-team-id"</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/delete_command.html">delete_command</a></span><span class="op">(</span>command_id <span class="op">=</span> <span class="va">cmd</span><span class="op">$</span><span class="va">id</span>, auth <span class="op">=</span> <span class="va">auth</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="error-handling">Error Handling<a class="anchor" aria-label="anchor" href="#error-handling"></a>
+</h2>
+<p>By default, HTTP errors raise a <code>mattermost_error</code> condition (stops execution). Switch to the legacy silent mode if you prefer <code>NULL</code> returns:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>MattermostR.on_error <span class="op">=</span> <span class="st">"message"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>This project is licensed under the MIT License.</p>
+<p>MIT</p>
 </div>
 </div>
-
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">

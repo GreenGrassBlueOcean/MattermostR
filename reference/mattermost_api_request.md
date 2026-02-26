@@ -51,5 +51,29 @@ mattermost_api_request(
 
 ## Value
 
-The content of the response, usually parsed as JSON, or an error message
-if the request fails.
+The content of the response, usually parsed as JSON. On error, raises a
+`mattermost_error` condition (default) or returns `NULL` (legacy mode).
+
+## Rate Limiting
+
+Requests are proactively throttled via
+[`httr2::req_throttle()`](https://httr2.r-lib.org/reference/req_throttle.html)
+at a rate controlled by `getOption("MattermostR.rate_limit", 10)`
+requests per second. Set to `Inf` to disable throttling. The default of
+10 matches Mattermost's out-of-the-box server setting (configurable in
+System Console).
+
+If the server returns HTTP 429 (Too Many Requests), the retry logic
+reads the `X-Ratelimit-Reset` header to wait exactly the right number of
+seconds before retrying.
+
+## Error Handling
+
+By default, HTTP errors and connection failures raise a
+`mattermost_error` condition (an S3 error class) that can be caught with
+`tryCatch(..., mattermost_error = function(e) ...)`.
+
+Set `options(MattermostR.on_error = "message")` to revert to the legacy
+behaviour where errors are emitted via
+[`message()`](https://rdrr.io/r/base/message.html) and the function
+returns `NULL`.

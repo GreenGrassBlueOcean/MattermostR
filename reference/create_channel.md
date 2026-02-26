@@ -11,7 +11,7 @@ create_channel(
   display_name = NULL,
   type = "O",
   verbose = FALSE,
-  auth = authenticate_mattermost()
+  auth = get_default_auth()
 )
 ```
 
@@ -44,7 +44,8 @@ create_channel(
 
 ## Value
 
-A list with details about the created channel.
+A named list with the created channel's fields (e.g. \`id\`,
+\`display_name\`, \`name\`, \`type\`, \`team_id\`).
 
 ## Examples
 

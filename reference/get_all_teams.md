@@ -5,7 +5,7 @@ List all teams in Mattermost
 ## Usage
 
 ``` r
-get_all_teams(verbose = FALSE, auth = authenticate_mattermost())
+get_all_teams(verbose = FALSE, auth = get_default_auth())
 ```
 
 ## Arguments
@@ -13,15 +13,17 @@ get_all_teams(verbose = FALSE, auth = authenticate_mattermost())
 - verbose:
 
   (Logical) If \`TRUE\`, detailed information about the request and
-  response will be printed.
+  response will be printed. Default is \`FALSE\`.
 
 - auth:
 
-  A list containing \`base_url\` and \`headers\` for authentication.
+  The authentication object created by \[authenticate_mattermost()\].
 
 ## Value
 
-A data frame containing details of all teams.
+A data frame with one row per team (columns include \`id\`,
+\`display_name\`, \`name\`, \`type\`, etc.). Returns an empty data frame
+/ list if the user belongs to no teams (with a warning).
 
 ## Examples
 

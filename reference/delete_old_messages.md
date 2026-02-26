@@ -1,14 +1,14 @@
 # Delete Messages Older Than X Days in a Mattermost Channel
 
 This function deletes messages that are older than a specified number of
-days in a given Mattermost channel. It fetches the messages from the
-channel, checks their timestamps, and deletes the ones that are older
-than the specified days.
+days in a given Mattermost channel. It auto-paginates through all posts
+in the channel, filters by creation timestamp, and deletes the ones
+older than the specified number of days.
 
 ## Usage
 
 ``` r
-delete_old_messages(channel_id, days, auth = authenticate_mattermost())
+delete_old_messages(channel_id, days, auth = get_default_auth())
 ```
 
 ## Arguments
@@ -28,7 +28,8 @@ delete_old_messages(channel_id, days, auth = authenticate_mattermost())
 
 ## Value
 
-A character vector of message IDs that were deleted.
+A data frame with columns \`message_id\` and \`delete_status\`, or an
+empty data frame if no messages were deleted.
 
 ## Examples
 

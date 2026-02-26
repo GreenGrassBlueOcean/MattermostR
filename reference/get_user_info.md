@@ -1,39 +1,38 @@
 # Get information about a specific Mattermost user
 
-Retrieve detailed information about a user, such as their username,
-email, roles, and ID.
+\`r lifecycle::badge("deprecated")\`
+
+\`get_user_info()\` was renamed to \[get_user()\] in MattermostR 0.2.0
+to provide a more consistent API. It will be removed in a future
+release.
 
 ## Usage
 
 ``` r
-get_user_info(user_id = NULL, auth = authenticate_mattermost())
+get_user_info(user_id = NULL, auth = get_default_auth())
 ```
 
 ## Arguments
 
 - user_id:
 
-  A character string containing the Mattermost user ID. You can also use
-  the special string \*\*"me"\*\* to retrieve information about the
-  currently authenticated user (the bot/user associated with the token).
+  A character string containing the Mattermost user ID, or \`"me"\` for
+  the authenticated user.
 
 - auth:
 
-  The authentication object created by \`authenticate_mattermost()\`.
+  The authentication object created by \[authenticate_mattermost()\].
 
 ## Value
 
-Parsed JSON response with user information (list).
+A named list with user fields returned by the Mattermost API (e.g.
+\`id\`, \`username\`, \`email\`, \`roles\`).
 
 ## Examples
 
 ``` r
 if (FALSE) { # \dontrun{
-  # Get info about a specific user by ID
-  user <- get_user_info("xb123abc456...")
-
-  # Get info about the current authenticated bot/user
-  myself <- get_user_info("me")
-  print(myself$id)
+  # Prefer get_user() instead:
+  user <- get_user("xb123abc456...")
 } # }
 ```

@@ -5,7 +5,7 @@ Check if the Mattermost server is online
 ## Usage
 
 ``` r
-check_mattermost_status(verbose = FALSE, auth = authenticate_mattermost())
+check_mattermost_status(verbose = FALSE, auth = get_default_auth())
 ```
 
 ## Arguments
