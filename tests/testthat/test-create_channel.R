@@ -1,5 +1,3 @@
-# File: tests/testthat/test-create_channel.R
-
 # Test suite for create_channel
 test_that("create_channel() works as expected", {
 

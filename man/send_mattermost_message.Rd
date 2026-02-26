@@ -8,12 +8,13 @@ send_mattermost_message(
   channel_id,
   message,
   priority = "Normal",
+  root_id = NULL,
   file_path = NULL,
   comment = NULL,
   plots = NULL,
   plot_name = NULL,
   verbose = FALSE,
-  auth = authenticate_mattermost()
+  auth = get_default_auth()
 )
 }
 \arguments{
@@ -23,8 +24,12 @@ send_mattermost_message(
 
 \item{priority}{A string specifying the priority of the message. Must be one of:
 - "Normal" (default)
-- "High"
-- "Low"}
+- "Important"
+- "Urgent"}
+
+\item{root_id}{Optional. The post ID of an existing message to reply to as a
+thread. When supplied, the new message appears as a threaded reply rather
+than a top-level post.}
 
 \item{file_path}{A vector of file paths to be sent as attachments. Each path must point to an existing file.}
 
@@ -108,7 +113,7 @@ response3 <- send_mattermost_message(
   message = "Please find the attached documents.",
   file_path = c(temp_file1, temp_file2),
   comment = "Attached: Report.pdf and Summary.docx.",
-  priority = "High",
+  priority = "Important",
   auth = auth,
   verbose = TRUE
 )
@@ -147,7 +152,7 @@ response5 <- send_mattermost_message(
   plots = list(plot1, plot2),
   plot_name = c("mtcars_plot.png", "cars_plot"),
   comment = "Attached: mtcars_plot.png, cars_plot, and mtcars.csv.",
-  priority = "Low",
+  priority = "Urgent",
   auth = auth,
   verbose = TRUE
 )
@@ -173,6 +178,14 @@ response6 <- send_mattermost_message(
 
 # Clean up temporary file
 unlink(temp_file3)
+
+# Example 7: Reply to an existing message as a thread
+response7 <- send_mattermost_message(
+  channel_id = channel_id,
+  message = "This is a threaded reply.",
+  root_id = response1$id,
+  auth = auth
+)
 
 }
 }

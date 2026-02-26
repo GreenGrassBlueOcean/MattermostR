@@ -4,21 +4,19 @@
 \alias{get_team_channels}
 \title{Get the list of channels for a team}
 \usage{
-get_team_channels(
-  team_id = NULL,
-  verbose = FALSE,
-  auth = authenticate_mattermost()
-)
+get_team_channels(team_id = NULL, verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
-\item{team_id}{The ID of the team for which to retrieve channels.}
+\item{team_id}{A character string containing the Mattermost team ID.}
 
-\item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
+\item{verbose}{(Logical) If `TRUE`, detailed information about the request
+and response will be printed. Default is `FALSE`.}
 
-\item{auth}{A list containing `base_url` and `headers` for authentication.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-A data frame of channels with their IDs and names.
+A data frame with one row per channel (columns include `id`,
+  `display_name`, `name`, `type`, `team_id`, etc.).
 }
 \description{
 Get the list of channels for a team

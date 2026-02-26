@@ -1,7 +1,7 @@
 Package: MattermostR
 Type: Package
 Title: Seamless Integration with the Mattermost API for Messaging and File Management
-Version: 0.1.0
+Version: 0.2.0
 Author: Laurens van der Burg
 Maintainer: Laurens van der Burg <laurens@ggbo.eu>
 Description: This package provides tools for interacting with Mattermost's API.
@@ -12,12 +12,14 @@ LazyData: true
 RoxygenNote: 7.3.3
 Imports: 
     curl,
-    httr2
+    httr2,
+    lifecycle
 Suggests: 
     jsonlite,
     mockery,
     httptest2,
     testthat (>= 3.0.0),
+    withr,
     ggplot2,
     officer
 Config/testthat/edition: 3

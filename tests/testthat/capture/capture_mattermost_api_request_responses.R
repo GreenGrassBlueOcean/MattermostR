@@ -1,5 +1,3 @@
-# File: tests/testthat/capture/capture-mattermost_api_request.R
-
 # This script captures HTTP responses for mattermost_api_request() unit tests.
 
 # Load necessary packages

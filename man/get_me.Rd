@@ -4,7 +4,7 @@
 \alias{get_me}
 \title{Get information about which user is belonging to bearer key,}
 \usage{
-get_me(verbose = TRUE, auth = authenticate_mattermost())
+get_me(verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
 \item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}

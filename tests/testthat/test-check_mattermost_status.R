@@ -1,5 +1,3 @@
-# File: tests/testthat/test-check_mattermost_status.R
-
 test_that("check_mattermost_status() works as expected", {
 
   # 1. Test case: Missing or invalid authentication object

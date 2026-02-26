@@ -1,7 +1,3 @@
-# File: R/send_message.R
-
-# File: R/send_message.R
-
 #' Send a Message to a Mattermost Channel with Optional Attachments
 #'
 #' This function sends a text message to a specified Mattermost channel, optionally including one or more attachment files and plots.
@@ -10,8 +6,11 @@
 #' @param message The content of the message to be sent. Must be a non-empty string.
 #' @param priority A string specifying the priority of the message. Must be one of:
 #'   - "Normal" (default)
-#'   - "High"
-#'   - "Low"
+#'   - "Important"
+#'   - "Urgent"
+#' @param root_id Optional. The post ID of an existing message to reply to as a
+#'   thread. When supplied, the new message appears as a threaded reply rather
+#'   than a top-level post.
 #' @param file_path A vector of file paths to be sent as attachments. Each path must point to an existing file.
 #' @param comment A comment to accompany the attachment files. Useful for providing context or instructions.
 #' @param plots A list of plot objects to attach to the message. Each plot can be:
@@ -85,7 +84,7 @@
 #'   message = "Please find the attached documents.",
 #'   file_path = c(temp_file1, temp_file2),
 #'   comment = "Attached: Report.pdf and Summary.docx.",
-#'   priority = "High",
+#'   priority = "Important",
 #'   auth = auth,
 #'   verbose = TRUE
 #' )
@@ -124,7 +123,7 @@
 #'   plots = list(plot1, plot2),
 #'   plot_name = c("mtcars_plot.png", "cars_plot"),
 #'   comment = "Attached: mtcars_plot.png, cars_plot, and mtcars.csv.",
-#'   priority = "Low",
+#'   priority = "Urgent",
 #'   auth = auth,
 #'   verbose = TRUE
 #' )
@@ -151,11 +150,20 @@
 #' # Clean up temporary file
 #' unlink(temp_file3)
 #'
+#' # Example 7: Reply to an existing message as a thread
+#' response7 <- send_mattermost_message(
+#'   channel_id = channel_id,
+#'   message = "This is a threaded reply.",
+#'   root_id = response1$id,
+#'   auth = auth
+#' )
+#'
 #' }
 send_mattermost_message <- function(channel_id, message, priority = "Normal",
+                                    root_id = NULL,
                                     file_path = NULL, comment = NULL,
                                     plots = NULL, plot_name = NULL,
-                                    verbose = FALSE, auth = authenticate_mattermost()) {
+                                    verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")
@@ -232,20 +240,27 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
     message = message
   )
 
+  # If root_id is provided, include it for thread replies
+  if (!is.null(root_id)) {
+    body$root_id <- root_id
+  }
+
   # If file_ids are present, include them in the body
   if (length(all_file_ids) > 0) {
     body$file_ids <- all_file_ids
   }
 
   # Only add priority if it's different from "Normal"
+  # Priority must go under metadata (not props) per Mattermost server source.
+  # See: Post.GetPriority() reads from Metadata.Priority
+  # Valid API values: "" (standard), "important", "urgent"
   if (priority != "Normal") {
-    body$props <- list(
+    body$metadata <- list(
       priority = list(
         priority = switch(priority,
-                          "High" = "important",
-                          "Low" = "minor",
+                          "Important" = "important",
+                          "Urgent" = "urgent",
                           priority)
-        # ,requested_ack = FALSE  # Set to TRUE if you want acknowledgments
       )
     )
   }
@@ -270,6 +285,7 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
 #' Normalize the priority input
 #'
 #' This function converts various casing inputs for priority to the correct format.
+#' Valid priorities match the Mattermost UI: Normal, Important, Urgent.
 #'
 #' @param priority A string representing the priority.
 #' @return A string with the corrected priority format.
@@ -278,18 +294,17 @@ normalize_priority <- function(priority) {
 
   if (priority_lowered == "normal") {
     return("Normal")
-  } else if (priority_lowered == "high") {
-    return("High")
-  } else if (priority_lowered == "low") {
-    return("Low")
+  } else if (priority_lowered == "important") {
+    return("Important")
+  } else if (priority_lowered == "urgent") {
+    return("Urgent")
   } else {
-    stop(sprintf("Invalid priority: '%s'. Must be one of: Normal, High, Low", priority))
+    stop(sprintf("Invalid priority: '%s'. Must be one of: Normal, Important, Urgent", priority))
   }
 }
 
 
-# !!! this is the rest api specification!!!!
-# therefore file_ids and priority are not working at this moment
+# Mattermost REST API specification for POST /api/v4/posts:
 # {
 #   "channel_id": "string",
 #   "message": "string",
@@ -300,7 +315,7 @@ normalize_priority <- function(priority) {
 #   "props": {},
 #   "metadata": {
 #     "priority": {
-#       "priority": "string",
+#       "priority": "string",        # "", "important", or "urgent"
 #       "requested_ack": true
 #     }
 #   }

@@ -20,8 +20,8 @@ test_that("add_user_to_channel() validates inputs", {
 test_that("add_user_to_channel() adds user and prints readable names", {
   stub(add_user_to_channel, "check_mattermost_auth", function(auth) {})
 
-  # Stub get_user_info to return a mock username
-  stub(add_user_to_channel, "get_user_info", function(user_id, auth) {
+  # Stub get_user to return a mock username
+  stub(add_user_to_channel, "get_user", function(user_id, auth) {
     return(list(username = "john_doe"))
   })
 
@@ -42,6 +42,24 @@ test_that("add_user_to_channel() adds user and prints readable names", {
   )
 
   # Ensure the raw data is still returned
+  expect_equal(result$user_id, "u1")
+})
+
+test_that("add_user_to_channel() with resolve_names = FALSE skips lookups", {
+  stub(add_user_to_channel, "check_mattermost_auth", function(auth) {})
+
+  api_mock <- mockery::mock(list(user_id = "u1", channel_id = "c1"))
+  stub(add_user_to_channel, "mattermost_api_request", api_mock)
+
+  # Should print IDs, not resolved names
+
+  expect_message(
+    result <- add_user_to_channel("c1", "u1", resolve_names = FALSE, auth = mock_auth),
+    "Success: User 'u1' is now a member of channel 'c1'"
+  )
+
+  # Only 1 API call should have been made (no get_user / get_channel_info)
+  expect_called(api_mock, 1)
   expect_equal(result$user_id, "u1")
 })
 

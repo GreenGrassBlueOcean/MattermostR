@@ -1,18 +1,19 @@
-# File: R/get_channel_info.R
 
 #' Get information about a Mattermost channel
 #'
-#' @param channel_id The Mattermost channel ID.
-#' @param auth The authentication object created by `authenticate_mattermost()`.
-#' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
+#' @param channel_id A character string containing the Mattermost channel ID.
+#' @param verbose (Logical) If `TRUE`, detailed information about the request
+#'   and response will be printed. Default is `FALSE`.
+#' @param auth The authentication object created by [authenticate_mattermost()].
 #'
-#' @return Parsed JSON response with channel information.
+#' @return A named list with channel fields returned by the Mattermost API
+#'   (e.g. `id`, `display_name`, `name`, `type`, `team_id`).
 #' @export
 #' @examples
 #' \dontrun{
 #'  get_channel_info(channel_id = "newchannel2", verbose = TRUE)
 #'}
-get_channel_info <- function(channel_id, verbose = FALSE, auth = authenticate_mattermost()) {
+get_channel_info <- function(channel_id, verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")

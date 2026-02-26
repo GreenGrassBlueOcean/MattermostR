@@ -2,3 +2,98 @@ url: https://greengrassblueocean.github.io/MattermostR/
 template:
   bootstrap: 5
 
+reference:
+  - title: Authentication
+    desc: Authenticate with the Mattermost API and manage credentials.
+    contents:
+      - authenticate_mattermost
+      - clear_mattermost_credentials
+      - print.mattermost_auth
+      - check_mattermost_auth
+
+  - title: Messaging
+    desc: Send, edit, and delete messages. Includes webhook and thread support.
+    contents:
+      - send_mattermost_message
+      - send_webhook_message
+      - update_post
+      - delete_post
+      - delete_old_messages
+
+  - title: Posts & Search
+    desc: Retrieve and search posts in channels.
+    contents:
+      - get_channel_posts
+      - search_posts
+
+  - title: Reactions & Pins
+    desc: Add emoji reactions and pin posts.
+    contents:
+      - add_reaction
+      - get_reactions
+      - remove_reaction
+      - pin_post
+      - unpin_post
+
+  - title: Channels
+    desc: Create, manage, and query channels and their members.
+    contents:
+      - create_channel
+      - create_direct_channel
+      - delete_channel
+      - get_channel_info
+      - get_channel_id_lookup
+      - get_team_channels
+      - get_channel_members
+      - add_user_to_channel
+      - add_users_to_channel
+      - remove_channel_member
+
+  - title: Teams
+    desc: List and retrieve teams.
+    contents:
+      - get_all_teams
+      - get_team
+
+  - title: Users
+    desc: Look up users and manage their status.
+    contents:
+      - get_me
+      - get_user
+      - get_user_info
+      - get_all_users
+      - get_user_status
+      - set_user_status
+
+  - title: Files
+    desc: Upload and download files.
+    contents:
+      - get_mattermost_file
+
+  - title: Bots
+    desc: Create and manage bot accounts.
+    contents:
+      - create_bot
+      - get_bot
+      - get_bots
+      - update_bot
+      - disable_bot
+      - enable_bot
+      - assign_bot
+
+  - title: Slash Commands
+    desc: Register and manage slash commands.
+    contents:
+      - create_command
+      - get_command
+      - list_commands
+      - update_command
+      - delete_command
+      - execute_command
+      - regen_command_token
+
+  - title: Low-level / Developer
+    desc: Direct API access and server utilities.
+    contents:
+      - mattermost_api_request
+      - check_mattermost_status

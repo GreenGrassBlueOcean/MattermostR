@@ -4,7 +4,7 @@
 \alias{delete_old_messages}
 \title{Delete Messages Older Than X Days in a Mattermost Channel}
 \usage{
-delete_old_messages(channel_id, days, auth = authenticate_mattermost())
+delete_old_messages(channel_id, days, auth = get_default_auth())
 }
 \arguments{
 \item{channel_id}{Character string. The ID of the Mattermost channel from which
@@ -15,12 +15,14 @@ messages should be deleted.}
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
 \value{
-A character vector of message IDs that were deleted.
+A data frame with columns `message_id` and `delete_status`, or an
+  empty data frame if no messages were deleted.
 }
 \description{
 This function deletes messages that are older than a specified number of days
-in a given Mattermost channel. It fetches the messages from the channel,
-checks their timestamps, and deletes the ones that are older than the specified days.
+in a given Mattermost channel. It auto-paginates through all posts in the
+channel, filters by creation timestamp, and deletes the ones older than the
+specified number of days.
 }
 \examples{
 \dontrun{

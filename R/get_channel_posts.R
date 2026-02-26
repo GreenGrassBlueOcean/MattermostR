@@ -1,27 +1,85 @@
-# File: R/get_channel_posts.R
 
 #' Get posts from a Mattermost channel
 #'
+#' Retrieves posts from a Mattermost channel with support for pagination.
+#' The Mattermost API returns at most `per_page` posts per request (default 60).
+#' Use the `page` and `per_page` parameters to paginate through results, or use
+#' `since` to retrieve all posts modified after a given timestamp (up to 1000).
+#'
 #' @param channel_id The Mattermost channel ID.
+#' @param page (Integer) The page to select (0-based). Default is 0.
+#' @param per_page (Integer) The number of posts per page. Default is 60, maximum is 200.
+#' @param since (Optional) A POSIXct, Date, or numeric (Unix time in milliseconds) value.
+#'   When provided, returns all posts created or modified after this time, up to a
+#'   server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page`.
 #' @param verbose Boolean. If `TRUE`, the function will print request/response details for more information.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
 #'
-#' @return Parsed JSON response with posts from the channel.
+#' @return A data frame of posts from the channel with columns `id`, `create_at`,
+#'   `update_at`, `edit_at`, `delete_at`, `is_pinned`, `user_id`, `channel_id`,
+#'   `message`, and `type`. Returns an empty data frame if no posts are found.
+#'
+#'   A warning is issued when the number of returned posts equals `per_page`,
+#'   indicating that additional pages may be available.
 #' @export
 #' @examples
 #' \dontrun{
 #'   teams <- get_all_teams()
 #'   team_channels <- get_team_channels(team_id = teams$id[1])
-#'   channel_id <- get_channel_id_lookup(team_channels, name = "off-topic")
+#'   channel_id <- get_channel_id_lookup(team_channels, "off-topic")
+#'
+#'   # Get the first page (default 60 posts)
 #'   posts <- get_channel_posts(channel_id)
+#'
+#'   # Get 200 posts per page, page 0
+#'   posts <- get_channel_posts(channel_id, per_page = 200)
+#'
+#'   # Get page 2
+#'   posts <- get_channel_posts(channel_id, page = 2, per_page = 200)
+#'
+#'   # Get all posts modified since a date (up to 1000)
+#'   posts <- get_channel_posts(channel_id, since = as.POSIXct("2024-01-01", tz = "UTC"))
 #' }
-get_channel_posts <- function(channel_id, verbose = FALSE, auth = authenticate_mattermost()) {
+get_channel_posts <- function(channel_id, page = 0, per_page = 60, since = NULL,
+                              verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")
   check_mattermost_auth(auth)
 
-  endpoint <- paste0("/api/v4/channels/", channel_id, "/posts")
+  # Validate per_page
+  if (!is.null(per_page) && (per_page < 1 || per_page > 200)) {
+    stop("per_page must be between 1 and 200.")
+  }
+
+  # Validate page
+  if (!is.null(page) && page < 0) {
+    stop("page must be 0 or greater.")
+  }
+
+  # 'since' cannot be combined with page/per_page
+  if (!is.null(since) && (page != 0 || per_page != 60)) {
+    stop("'since' cannot be combined with non-default 'page' or 'per_page'. Use one approach or the other.")
+  }
+
+  # Build query parameters
+  query_params <- list()
+
+  if (!is.null(since)) {
+    # Convert since to millisecond timestamp
+    since_ms <- convert_since_to_ms(since)
+    query_params[["since"]] <- since_ms
+  } else {
+    query_params[["page"]] <- page
+    query_params[["per_page"]] <- per_page
+  }
+
+  # Build the endpoint with query string
+  query_string <- paste0(
+    names(query_params), "=", query_params,
+    collapse = "&"
+  )
+  endpoint <- paste0("/api/v4/channels/", channel_id, "/posts?", query_string)
 
   # Send the request using mattermost_api_request
   response <- mattermost_api_request(
@@ -31,9 +89,42 @@ get_channel_posts <- function(channel_id, verbose = FALSE, auth = authenticate_m
     verbose = verbose
   )
 
-  response <- convert_mattermost_posts_to_dataframe(response)
+  result_df <- convert_mattermost_posts_to_dataframe(response)
 
-  return(response)
+  # Warn when pagination limit is hit (only for page/per_page mode)
+  if (is.null(since) && nrow(result_df) == per_page) {
+    warning(sprintf(
+      "Returned %d posts, which matches the 'per_page' limit. There may be more posts. Use 'page' to retrieve additional pages.",
+      nrow(result_df)
+    ))
+  }
+
+  return(result_df)
+}
+
+#' Convert a since value to Unix timestamp in milliseconds
+#'
+#' Accepts POSIXct, Date, character (YYYY-MM-DD), or numeric (already in ms).
+#' @param since The since value to convert.
+#' @return Numeric Unix timestamp in milliseconds.
+#' @noRd
+convert_since_to_ms <- function(since) {
+  if (is.numeric(since)) {
+    return(since)
+  }
+  if (is.character(since)) {
+    since <- tryCatch(
+      as.POSIXct(since, tz = "UTC"),
+      error = function(e) stop("Invalid 'since' date format. Use YYYY-MM-DD, POSIXct, or numeric milliseconds.")
+    )
+  }
+  if (inherits(since, "Date")) {
+    since <- as.POSIXct(since, tz = "UTC")
+  }
+  if (inherits(since, "POSIXct")) {
+    return(as.numeric(since) * 1000)
+  }
+  stop("'since' must be a POSIXct, Date, character (YYYY-MM-DD), or numeric (Unix ms).")
 }
 
 #' Convert Mattermost Posts Nested List to Data Frame
@@ -82,4 +173,3 @@ convert_mattermost_posts_to_dataframe <- function(nested_list) {
 
   return(posts_df)
 }
-

@@ -1,5 +1,3 @@
-# File: tests/testthat/test-send_message.R
-
 library(testthat)
 library(mockery)
 library(ggplot2)
@@ -75,20 +73,31 @@ test_that("send_mattermost_message() throws error when message is NULL", {
 test_that("send_mattermost_message() throws error for invalid priority", {
   expect_error(
     send_mattermost_message(channel_id = "123", message = "Hello", priority = "invalid", auth = mock_auth),
-    "Invalid priority: 'invalid'. Must be one of: Normal, High, Low"
+    "Invalid priority: 'invalid'. Must be one of: Normal, Important, Urgent"
   )
 })
 
 test_that("send_mattermost_message() correctly normalizes priority inputs", {
   expect_equal(normalize_priority("normal"), "Normal")
-  expect_equal(normalize_priority("HIGH"), "High")
-  expect_equal(normalize_priority("lOw"), "Low")
+  expect_equal(normalize_priority("IMPORTANT"), "Important")
+  expect_equal(normalize_priority("important"), "Important")
+  expect_equal(normalize_priority("uRgEnT"), "Urgent")
+  expect_equal(normalize_priority("urgent"), "Urgent")
 })
 
 test_that("normalize_priority() throws error for invalid priority inputs", {
   expect_error(
     normalize_priority("invalid"),
-    "Invalid priority: 'invalid'. Must be one of: Normal, High, Low"
+    "Invalid priority: 'invalid'. Must be one of: Normal, Important, Urgent"
+  )
+  # "High" and "Low" are no longer valid priorities
+  expect_error(
+    normalize_priority("High"),
+    "Invalid priority: 'High'. Must be one of: Normal, Important, Urgent"
+  )
+  expect_error(
+    normalize_priority("Low"),
+    "Invalid priority: 'Low'. Must be one of: Normal, Important, Urgent"
   )
 })
 
@@ -123,7 +132,7 @@ test_that("send_mattermost_message() successfully sends a message with a single 
     message = "Hello with file",
     file_path = temp_file,
     comment = "Please review the attached file.",
-    priority = "High",
+    priority = "Important",
     auth = mock_auth,
     verbose = FALSE
   )
@@ -176,7 +185,7 @@ test_that("send_mattermost_message() successfully sends a message with multiple 
     message = "Hello with multiple files",
     file_path = c(temp_file1, temp_file2),
     comment = "Please review the attached files.",
-    priority = "High",
+    priority = "Important",
     auth = mock_auth,
     verbose = FALSE
   )
@@ -218,7 +227,7 @@ test_that("send_mattermost_message() successfully sends a message with verbose e
       message = "Hello with verbose",
       file_path = temp_file,
       comment = "Please review the attached file.",
-      priority = "High",
+      priority = "Important",
       auth = mock_auth,
       verbose = TRUE
     ),
@@ -232,7 +241,7 @@ test_that("send_mattermost_message() successfully sends a message with verbose e
   unlink(temp_file)
 })
 
-test_that("send_mattermost_message() correctly handles priority settings", {
+test_that("send_mattermost_message() correctly handles priority settings via metadata", {
   # Mock 'check_mattermost_auth' to do nothing
   stub(send_mattermost_message, "check_mattermost_auth", function(auth) {})
 
@@ -243,25 +252,31 @@ test_that("send_mattermost_message() correctly handles priority settings", {
   # Mock 'mattermost_api_request' to return a successful response
   mock_response <- list(status = "OK", id = "post123")
   stub(send_mattermost_message, "mattermost_api_request", function(auth, endpoint, method, body, verbose) {
-    if (body$message == "Priority High") {
-      expect_equal(body$props$priority$priority, "important")
-    } else if (body$message == "Priority Normal") {
+    if (body$message == "Priority Important") {
+      # Priority should be under metadata, not props
       expect_null(body$props)
-    } else if (body$message == "Priority Low") {
-      expect_equal(body$props$priority$priority, "minor")
+      expect_equal(body$metadata$priority$priority, "important")
+    } else if (body$message == "Priority Normal") {
+      # Normal priority should not add metadata or props
+      expect_null(body$props)
+      expect_null(body$metadata)
+    } else if (body$message == "Priority Urgent") {
+      # Priority should be under metadata, not props
+      expect_null(body$props)
+      expect_equal(body$metadata$priority$priority, "urgent")
     }
     return(mock_response)
   })
 
-  # Test case: Priority High
-  result_high <- send_mattermost_message(
+  # Test case: Priority Important
+  result_important <- send_mattermost_message(
     channel_id = "123",
-    message = "Priority High",
-    priority = "High",
+    message = "Priority Important",
+    priority = "Important",
     auth = mock_auth,
     verbose = FALSE
   )
-  expect_equal(result_high, mock_response)
+  expect_equal(result_important, mock_response)
 
   # Test case: Priority Normal
   result_normal <- send_mattermost_message(
@@ -273,15 +288,15 @@ test_that("send_mattermost_message() correctly handles priority settings", {
   )
   expect_equal(result_normal, mock_response)
 
-  # Test case: Priority Low
-  result_low <- send_mattermost_message(
+  # Test case: Priority Urgent
+  result_urgent <- send_mattermost_message(
     channel_id = "123",
-    message = "Priority Low",
-    priority = "Low",
+    message = "Priority Urgent",
+    priority = "Urgent",
     auth = mock_auth,
     verbose = FALSE
   )
-  expect_equal(result_low, mock_response)
+  expect_equal(result_urgent, mock_response)
 })
 
 test_that("send_mattermost_message() throws an error when more than 5 attachments are provided", {
@@ -479,6 +494,81 @@ test_that("send_mattermost_message() throws an error for unexpected file respons
 })
 
 
+test_that("send_mattermost_message() includes root_id in body when provided", {
+  stub(send_mattermost_message, "check_mattermost_auth", function(auth) {})
+  stub(send_mattermost_message, "upload_files", function(...) list())
+  stub(send_mattermost_message, "handle_plot_attachments", function(...) list())
+
+  mock_response <- list(status = "OK", id = "reply456")
+  stub(send_mattermost_message, "mattermost_api_request", function(auth, endpoint, method, body, verbose) {
+    expect_equal(body$root_id, "parent_post_id_123")
+    expect_equal(body$channel_id, "ch1")
+    expect_equal(body$message, "Thread reply")
+    return(mock_response)
+  })
+
+  result <- send_mattermost_message(
+    channel_id = "ch1",
+    message = "Thread reply",
+    root_id = "parent_post_id_123",
+    auth = mock_auth,
+    verbose = FALSE
+  )
+
+  expect_equal(result, mock_response)
+})
+
+test_that("send_mattermost_message() omits root_id from body when NULL (default)", {
+  stub(send_mattermost_message, "check_mattermost_auth", function(auth) {})
+  stub(send_mattermost_message, "upload_files", function(...) list())
+  stub(send_mattermost_message, "handle_plot_attachments", function(...) list())
+
+  mock_response <- list(status = "OK", id = "post789")
+  stub(send_mattermost_message, "mattermost_api_request", function(auth, endpoint, method, body, verbose) {
+    expect_null(body$root_id)
+    return(mock_response)
+  })
+
+  result <- send_mattermost_message(
+    channel_id = "ch1",
+    message = "Top-level post",
+    auth = mock_auth,
+    verbose = FALSE
+  )
+
+  expect_equal(result, mock_response)
+})
+
+test_that("send_mattermost_message() combines root_id with priority and file attachments", {
+  temp_file <- tempfile(fileext = ".txt")
+  writeLines("content", temp_file)
+
+  stub(send_mattermost_message, "check_mattermost_auth", function(auth) {})
+  stub(send_mattermost_message, "upload_files", function(...) list("file_id_1"))
+  stub(send_mattermost_message, "handle_plot_attachments", function(...) list())
+
+  mock_response <- list(status = "OK", id = "reply_with_file")
+  stub(send_mattermost_message, "mattermost_api_request", function(auth, endpoint, method, body, verbose) {
+    expect_equal(body$root_id, "parent_abc")
+    expect_equal(body$file_ids, list("file_id_1"))
+    expect_equal(body$metadata$priority$priority, "urgent")
+    return(mock_response)
+  })
+
+  result <- send_mattermost_message(
+    channel_id = "ch1",
+    message = "Urgent thread reply with attachment",
+    root_id = "parent_abc",
+    priority = "Urgent",
+    file_path = temp_file,
+    auth = mock_auth,
+    verbose = FALSE
+  )
+
+  expect_equal(result, mock_response)
+  unlink(temp_file)
+})
+
 test_that("send_mattermost_message() defaults priority to 'Normal' when priority is NULL", {
   # Step 1: Create a temporary file
   temp_file <- tempfile(fileext = ".txt")
@@ -502,11 +592,12 @@ test_that("send_mattermost_message() defaults priority to 'Normal' when priority
     list()
   })
 
-  # Step 5: Mock 'mattermost_api_request' to verify 'props' is not included
+  # Step 5: Mock 'mattermost_api_request' to verify neither 'props' nor 'metadata' is included
   mock_response <- list(status = "OK", id = "post123")
   stub(send_mattermost_message, "mattermost_api_request", function(auth, endpoint, method, body, verbose) {
-    # Verify that 'props' is not present in the body
+    # Verify that neither 'props' nor 'metadata' is present in the body (Normal priority)
     expect_null(body$props)
+    expect_null(body$metadata)
     # Verify that 'file_ids' contains the mocked file ID
     expect_equal(body$file_ids, list("file_mock_id"))
     return(mock_response)

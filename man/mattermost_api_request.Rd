@@ -27,10 +27,34 @@ mattermost_api_request(
 \item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
 }
 \value{
-The content of the response, usually parsed as JSON, or an error message if the request fails.
+The content of the response, usually parsed as JSON. On error, raises a
+  \code{mattermost_error} condition (default) or returns \code{NULL} (legacy mode).
 }
 \description{
 This function sends an HTTP request to the Mattermost API using authentication details,
 endpoint, and method provided. It handles retries with exponential backoff for
 failed requests and supports both regular JSON requests and multipart file uploads.
 }
+\section{Rate Limiting}{
+
+Requests are proactively throttled via \code{httr2::req_throttle()} at a rate
+controlled by \code{getOption("MattermostR.rate_limit", 10)} requests per second.
+Set to \code{Inf} to disable throttling. The default of 10 matches
+Mattermost's out-of-the-box server setting (configurable in System Console).
+
+If the server returns HTTP 429 (Too Many Requests), the retry logic reads the
+\code{X-Ratelimit-Reset} header to wait exactly the right number of seconds
+before retrying.
+}
+
+\section{Error Handling}{
+
+By default, HTTP errors and connection failures raise a \code{mattermost_error}
+condition (an S3 error class) that can be caught with
+\code{tryCatch(..., mattermost_error = function(e) ...)}.
+
+Set \code{options(MattermostR.on_error = "message")} to revert to the legacy
+behaviour where errors are emitted via \code{message()} and the function
+returns \code{NULL}.
+}
+

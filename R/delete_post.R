@@ -1,4 +1,3 @@
-# File: R/delete_post.R
 
 #' Delete a specific post in Mattermost
 #'
@@ -6,14 +5,15 @@
 #' @param verbose Boolean. If `TRUE`, the function will print request/response details for more information.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
 #'
-#' @return Parsed JSON response confirming deletion.
+#' @return A named list with the deletion status as returned by the
+#'   Mattermost API.
 #' @export
 #' @examples
 #'
 #' \dontrun{
 #'  delete_post(post_id = "fake_id")
 #' }
-delete_post <- function(post_id = NULL, verbose = FALSE,auth = authenticate_mattermost()) {
+delete_post <- function(post_id = NULL, verbose = FALSE,auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(post_id, "post_id")

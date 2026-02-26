@@ -1,12 +1,13 @@
-# File: R/get_mattermost_file.R
 
 #' Retrieve a file from Mattermost
 #'
 #' This function retrieves a file from Mattermost based on its file ID.
 #'
 #' @param file_id The ID of the file to be retrieved.
-#' @param auth A list containing `base_url` and `headers` for authentication.
-#' @return The response from the Mattermost API, which may contain the file data.
+#' @param auth The authentication object created by [authenticate_mattermost()].
+#' @return The file contents as returned by the Mattermost API. The exact type
+#'   depends on the file's content type (typically raw bytes or a character
+#'   string).
 #' @export
 #' @examples
 #' \dontrun{
@@ -17,7 +18,7 @@
 #'
 #' file_response <- get_mattermost_file(file_id = "i5rb43jei787jxcud7ekyyyyhc")
 #' }
-get_mattermost_file <- function(file_id, auth = authenticate_mattermost()) {
+get_mattermost_file <- function(file_id, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(file_id, "file_id")

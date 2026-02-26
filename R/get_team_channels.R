@@ -1,12 +1,13 @@
-# File: R/get_team_channels.R
 
 #' Get the list of channels for a team
 #'
-#' @param auth A list containing `base_url` and `headers` for authentication.
-#' @param team_id The ID of the team for which to retrieve channels.
-#' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
+#' @param team_id A character string containing the Mattermost team ID.
+#' @param verbose (Logical) If `TRUE`, detailed information about the request
+#'   and response will be printed. Default is `FALSE`.
+#' @param auth The authentication object created by [authenticate_mattermost()].
 #'
-#' @return A data frame of channels with their IDs and names.
+#' @return A data frame with one row per channel (columns include `id`,
+#'   `display_name`, `name`, `type`, `team_id`, etc.).
 #' @export
 #'
 #' @seealso [get_channel_id_by_display_name()]
@@ -17,21 +18,13 @@
 #' teams <- get_all_teams()
 #' team_channels <- get_team_channels(team_id = teams$id[1])
 #' }
-get_team_channels <- function(team_id = NULL, verbose = FALSE, auth= authenticate_mattermost()) {
+get_team_channels <- function(team_id = NULL, verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(team_id, "team_id")
   check_mattermost_auth(auth)
 
-
+  # Auto-paginate through all channels (API defaults to 60 per page)
   endpoint <- paste0("/api/v4/teams/", team_id, "/channels")
-
-  # Send the request to get channels
-  channels_data <- mattermost_api_request( auth = auth
-                                          , endpoint =  endpoint
-                                          , method = "GET"
-                                          , verbose = verbose
-                                          )
-
-  return(channels_data)
+  paginate_api(auth, endpoint, per_page = 200, verbose = verbose)
 }

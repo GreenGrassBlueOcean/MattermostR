@@ -1,4 +1,3 @@
-# File: tests/testthat/test-get_channel_id_lookup.R
 #library(testthat)
 
 # Sample data frame for testing

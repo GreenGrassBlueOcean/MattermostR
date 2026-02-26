@@ -26,10 +26,6 @@ validate_plots <- function(plots, plot_name) {
     plots <- list(plots)
   }
 
-  # Debugging: Log input lengths
-  message(sprintf("Number of plots: %d", length(plots)))
-  message(sprintf("Number of plot names: %d", length(plot_name)))
-
   # Validate plot_name length
   if (length(plot_name) > 1 && length(plot_name) != length(plots)) {
     stop(sprintf(
@@ -46,9 +42,6 @@ validate_plots <- function(plots, plot_name) {
   } else if(length(plot_name) == 0 && length(plots) > 0){
     plot_name <- paste0("plot", seq_along(plots), ".png")
   }
-
-  # Debugging: Log generated names
-  message(sprintf("Generated plot names: %s", paste(plot_name, collapse = ", ")))
 
   # Ensure all plot names have valid extensions
   plot_name <- unname(sapply(plot_name, function(name) {

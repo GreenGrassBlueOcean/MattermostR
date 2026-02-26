@@ -4,15 +4,17 @@
 \alias{get_mattermost_file}
 \title{Retrieve a file from Mattermost}
 \usage{
-get_mattermost_file(file_id, auth = authenticate_mattermost())
+get_mattermost_file(file_id, auth = get_default_auth())
 }
 \arguments{
 \item{file_id}{The ID of the file to be retrieved.}
 
-\item{auth}{A list containing `base_url` and `headers` for authentication.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-The response from the Mattermost API, which may contain the file data.
+The file contents as returned by the Mattermost API. The exact type
+  depends on the file's content type (typically raw bytes or a character
+  string).
 }
 \description{
 This function retrieves a file from Mattermost based on its file ID.

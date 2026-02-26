@@ -1,5 +1,3 @@
-# File: tests/testthat/test-mattermost_api_request_with_http_errors.R
-
 # Mock function to simulate different HTTP error responses
 mock_error_response <- function(status_code, body) {
   function(...) {
@@ -28,6 +26,7 @@ mock_error_response <- function(status_code, body) {
 }
 
 test_that("mattermost_api_request handles specific error responses correctly", {
+  withr::local_options(MattermostR.on_error = "message")
   # Mock auth details
   mock_auth <- list(base_url = "https://fakeurl.com", headers = "Bearer TOKEN")
 
@@ -160,6 +159,7 @@ mock_error_response <- function(status_code, body) {
 }
 
 test_that("mattermost_api_request handles specific error responses correctly", {
+  withr::local_options(MattermostR.on_error = "message")
   # Mock auth details
   mock_auth <- list(base_url = "https://fakeurl.com", headers = "Bearer TOKEN")
 

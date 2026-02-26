@@ -14,4 +14,5 @@ A string with the corrected priority format.
 }
 \description{
 This function converts various casing inputs for priority to the correct format.
+Valid priorities match the Mattermost UI: Normal, Important, Urgent.
 }

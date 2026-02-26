@@ -9,29 +9,67 @@ authenticate_mattermost(
   token = NULL,
   username = NULL,
   password = NULL,
-  test_connection = FALSE
+  test_connection = FALSE,
+  cache_credentials = TRUE
 )
 }
 \arguments{
 \item{base_url}{The base URL of the Mattermost server. Do not add the team name here so really only  "https://yourmattermost.stackhero-network.com/"}
 
-\item{token}{Optional. The Bearer token for authentication. If NULL, it will be retrieved from options().}
+\item{token}{Optional. The Bearer token for authentication. If NULL, resolved
+from \code{MATTERMOST_TOKEN} env var, then \code{options("mattermost.token")}.}
 
 \item{username}{Optional. The username for login if not using a token.}
 
 \item{password}{Optional. The password for login if not using a token.}
 
 \item{test_connection}{Boolean. If `TRUE`, the function will check the connection status with Mattermost.}
+
+\item{cache_credentials}{Boolean. If `TRUE` (default), stores the token and
+base URL in R \code{options()} so that subsequent calls can use
+\code{get_default_auth()}. Set to \code{FALSE} in shared environments to
+avoid exposing the token in session state.}
 }
 \value{
 A `mattermost_auth` object containing `base_url` and `headers` for further API calls.
 }
 \description{
-Authenticate with Mattermost API
+Creates a \code{mattermost_auth} object for use with all MattermostR functions.
 }
+\section{Credential Resolution}{
+
+When \code{token} or \code{base_url} are not supplied as arguments, the
+function looks for them in two places, in order:
+\enumerate{
+  \item \strong{Environment variables} — \code{MATTERMOST_TOKEN} and
+        \code{MATTERMOST_URL}.
+  \item \strong{R options} — \code{mattermost.token} and
+        \code{mattermost.base_url}.
+}
+Environment variables are the recommended approach in shared or production
+environments (e.g. RStudio Server, Posit Workbench) because they are not
+visible to other code running in the same R session.
+}
+
+\section{Security}{
+
+By default (\code{cache_credentials = TRUE}), the resolved token and URL are
+stored in R \code{options()} for convenience. In shared environments, set
+\code{cache_credentials = FALSE} and pass the returned auth object explicitly,
+or use \code{\link{clear_mattermost_credentials}()} when done.
+}
+
 \examples{
 \dontrun{
+# Token-based (caches by default)
 authenticate_mattermost(base_url = "https://mattermost.stackhero-network.com"
 , token = "your token", test_connection = TRUE)
+
+# Secure: don't cache in options, rely on env vars for subsequent calls
+auth <- authenticate_mattermost(
+  base_url = "https://mm.example.com",
+  token = Sys.getenv("MATTERMOST_TOKEN"),
+  cache_credentials = FALSE
+)
 }
 }

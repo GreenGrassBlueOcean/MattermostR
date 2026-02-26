@@ -1,4 +1,3 @@
-# File: R/send_mattermost_file.R
 
 #' Send a file to a Mattermost channel
 #'
@@ -36,10 +35,10 @@
 #' print(response)
 #' unlink(fileconn)
 #' }
-send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = authenticate_mattermost(), verbose = FALSE) {
+send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = get_default_auth(), verbose = FALSE) {
 
   # Define the endpoint for sending a file
-  endpoint <- paste0("/api/v4/files")
+  endpoint <- "/api/v4/files"
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")
@@ -51,40 +50,25 @@ send_mattermost_file <- function(channel_id, file_path, comment = NULL, auth = a
     stop("The file specified by 'file_path' does not exist.")
   }
 
-
-  # Construct headers
-  headers <- list(
-    Authorization = auth$headers,
-    Accept = "application/json"
+  # Build multipart body
+  body <- list(
+    files = curl::form_file(file_path),
+    channel_id = channel_id
   )
 
-  # Create the request object with base URL
-  req <- httr2::request(paste0(auth$base_url, endpoint)) |>
-         httr2::req_headers(!!!headers)
-
-  if(!is.null(comment)){
-    req <- httr2::req_body_multipart(.req = req,
-                                     files = curl::form_file(file_path), # Add the file to the request
-                                     channel_id = channel_id,
-                                     comment = comment)
-  } else {
-    req <- httr2::req_body_multipart(.req =  req,
-                                     files = curl::form_file(file_path), # Add the file to the request
-                                     channel_id = channel_id
-                                     )
-
+  if (!is.null(comment)) {
+    body$comment <- comment
   }
 
-
-  if(verbose){
-    req |> httr2::req_verbose()
-  }
-
-  # Perform the request and handle the response
-  response <- httr2::req_perform(req)
-
-  # Handle the response content
-  result <- handle_response_content(response = response, verbose = verbose)
+  # Delegate to central API handler (provides retry, backoff, error handling, verbose)
+  result <- mattermost_api_request(
+    auth      = auth,
+    endpoint  = endpoint,
+    method    = "POST",
+    body      = body,
+    multipart = TRUE,
+    verbose   = verbose
+  )
 
   return(result)
 }

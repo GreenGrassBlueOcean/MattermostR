@@ -1,4 +1,3 @@
-# File: R/create_channel.R
 
 #' Create a new Mattermost channel
 #'
@@ -9,7 +8,8 @@
 #' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
 #'
-#' @return A list with details about the created channel.
+#' @return A named list with the created channel's fields (e.g. `id`,
+#'   `display_name`, `name`, `type`, `team_id`).
 #' @export
 #' @examples
 #' \dontrun{
@@ -17,7 +17,7 @@
 #' new_channel <- create_channel(team_id = teams$id[1], name = "newchannel2"
 #' , display_name = "a new channel", verbose = TRUE)
 #' }
-create_channel <- function(team_id = NULL, name = NULL, display_name = NULL, type = "O", verbose = FALSE, auth = authenticate_mattermost()) {
+create_channel <- function(team_id = NULL, name = NULL, display_name = NULL, type = "O", verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(team_id, "team_id")

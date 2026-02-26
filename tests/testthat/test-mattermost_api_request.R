@@ -56,8 +56,6 @@ test_that("mattermost_api_request() works as expected", {
   )
 })
 
-# File: tests/testthat/test-mattermost_api_request.R
-
 library(testthat)
 library(mockery)
 library(httr2)
@@ -149,7 +147,8 @@ test_that("mattermost_api_request() handles multipart requests (Lines 53-54)", {
   expect_null(res)
 })
 
-test_that("mattermost_api_request() handles NULL response (Lines 83-84)", {
+test_that("mattermost_api_request() handles NULL response in message mode (Lines 83-84)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Stub req_perform to return NULL directly
   stub(mattermost_api_request, "req_perform", function(...) return(NULL))
 
@@ -161,7 +160,8 @@ test_that("mattermost_api_request() handles NULL response (Lines 83-84)", {
   expect_null(res)
 })
 
-test_that("mattermost_api_request() handles non-JSON error content (Line 100)", {
+test_that("mattermost_api_request() handles non-JSON error content in message mode (Line 100)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Mock an error response (e.g., 502 Bad Gateway)
   mock_perform <- function(...) {
     # Use text/plain with charset to ensure textConnection works
@@ -174,7 +174,7 @@ test_that("mattermost_api_request() handles non-JSON error content (Line 100)", 
 
   expect_message(
     res <- mattermost_api_request(auth = mock_auth, endpoint = "/test"),
-    "Error content: Bad Gateway"
+    "Error details: Bad Gateway"
   )
 
   expect_null(res)
@@ -191,4 +191,116 @@ test_that("mattermost_api_request() backoff function works (Line 64)", {
   res <- mattermost_api_request(auth = mock_auth, endpoint = "/retry-test")
   # Returns NULL because body is empty, but no warning about content-type NA
   expect_null(res)
+})
+
+
+# --- Rate limit helper tests ---
+
+test_that("mm_is_transient() returns TRUE for 429, FALSE for other codes", {
+  resp_429 <- mock_response_factory(429)
+  resp_200 <- mock_response_factory(200)
+  resp_500 <- mock_response_factory(500)
+  resp_503 <- mock_response_factory(503)
+
+  expect_true(mm_is_transient(resp_429))
+  expect_false(mm_is_transient(resp_200))
+  expect_false(mm_is_transient(resp_500))
+  expect_false(mm_is_transient(resp_503))
+})
+
+test_that("mm_after() extracts seconds from X-Ratelimit-Reset header", {
+  resp <- mock_response_factory(429)
+  resp <- mock_resp_headers(resp, `X-Ratelimit-Reset` = "1")
+
+  result <- mm_after(resp)
+  expect_equal(result, 1.1)  # 1 second + 0.1 buffer
+})
+
+test_that("mm_after() handles larger reset values", {
+  resp <- mock_response_factory(429)
+  resp <- mock_resp_headers(resp, `X-Ratelimit-Reset` = "5")
+
+  result <- mm_after(resp)
+  expect_equal(result, 5.1)
+})
+
+test_that("mm_after() returns NA when header is missing", {
+  resp <- mock_response_factory(429)
+
+  result <- mm_after(resp)
+  expect_true(is.na(result))
+})
+
+test_that("mm_after() returns NA when header is non-numeric", {
+  resp <- mock_response_factory(429)
+  resp <- mock_resp_headers(resp, `X-Ratelimit-Reset` = "not-a-number")
+
+  result <- mm_after(resp)
+  expect_true(is.na(result))
+})
+
+test_that("mm_after() returns 0.1 (minimum) when reset is 0", {
+  resp <- mock_response_factory(429)
+  resp <- mock_resp_headers(resp, `X-Ratelimit-Reset` = "0")
+
+  result <- mm_after(resp)
+  expect_equal(result, 0.1)
+})
+
+test_that("mm_after() works on non-429 responses (returns value if header present)", {
+  # mm_after only reads the header; it doesn't check status code.
+  # httr2 only calls it on transient responses, but the function itself is agnostic.
+  resp <- mock_response_factory(200)
+  resp <- mock_resp_headers(resp, `X-Ratelimit-Reset` = "3")
+
+  result <- mm_after(resp)
+  expect_equal(result, 3.1)
+})
+
+# --- Throttle option tests ---
+
+test_that("mattermost_api_request() applies req_throttle when rate_limit is numeric", {
+  withr::local_options(MattermostR.rate_limit = 10)
+
+  captured_req <- NULL
+  stub(mattermost_api_request, "req_perform", function(req) {
+    captured_req <<- req
+    mock_response_factory(200, content_type = "application/json")
+  })
+
+  res <- mattermost_api_request(auth = mock_auth, endpoint = "/throttle-test")
+
+  # req_throttle sets policies$throttle_realm on the request
+  expect_true(!is.null(captured_req$policies$throttle_realm))
+})
+
+test_that("mattermost_api_request() skips req_throttle when rate_limit is Inf", {
+  withr::local_options(MattermostR.rate_limit = Inf)
+
+  captured_req <- NULL
+  stub(mattermost_api_request, "req_perform", function(req) {
+    captured_req <<- req
+    mock_response_factory(200, content_type = "application/json")
+  })
+
+  res <- mattermost_api_request(auth = mock_auth, endpoint = "/inf-throttle-test")
+
+  # Inf is not finite, so throttle should be skipped
+  expect_null(captured_req$policies$throttle_realm)
+})
+
+test_that("mattermost_api_request() uses default throttle (10/s) when option is unset", {
+  # Removing the option (setting to NULL) causes getOption to return default of 10
+  withr::local_options(MattermostR.rate_limit = NULL)
+
+  captured_req <- NULL
+  stub(mattermost_api_request, "req_perform", function(req) {
+    captured_req <<- req
+    mock_response_factory(200, content_type = "application/json")
+  })
+
+  res <- mattermost_api_request(auth = mock_auth, endpoint = "/default-throttle-test")
+
+  # Default 10 req/s should apply throttle
+  expect_true(!is.null(captured_req$policies$throttle_realm))
 })

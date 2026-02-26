@@ -42,7 +42,8 @@ test_that("mattermost_api_request() triggers error handler on connection failure
   })
 
   # 2. Stub 'handle_http_error' to verify it gets called.
-  stub(MattermostR::mattermost_api_request, "handle_http_error", function(e) {
+  #    Updated signature to match new handle_http_error(e, endpoint, method)
+  stub(MattermostR::mattermost_api_request, "handle_http_error", function(e, endpoint = "", method = "") {
     stop("Caught by handle_http_error: ", e$message)
   })
 

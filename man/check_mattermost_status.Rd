@@ -4,7 +4,7 @@
 \alias{check_mattermost_status}
 \title{Check if the Mattermost server is online}
 \usage{
-check_mattermost_status(verbose = FALSE, auth = authenticate_mattermost())
+check_mattermost_status(verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
 \item{verbose}{Boolean. If `TRUE`, the function will print request/response details for more information.}

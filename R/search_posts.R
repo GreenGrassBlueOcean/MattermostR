@@ -66,7 +66,7 @@
 #'   channel_id <- get_channel_id_lookup(channels, name = "off-topic")
 #'
 #'   # b. Add the bot to the channel (safe to run even if already a member)
-#'   me <- get_user_info("me", auth = auth)
+#'   me <- get_user("me", auth = auth)
 #'   add_user_to_channel(channel_id, me$id, auth = auth)
 #'
 #'   # c. Perform the search
@@ -107,7 +107,7 @@ search_posts <- function(terms,
                          per_page = 200,
                          time_zone_offset = 0,
                          verbose = FALSE,
-                         auth = authenticate_mattermost()) {
+                         auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(terms, "terms")

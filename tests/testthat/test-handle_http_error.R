@@ -1,5 +1,3 @@
-# File: tests/testthat/test-http_error_handler.R
-
 # Mock function to simulate different HTTP error responses
 mock_error_response <- function(status_code, body) {
   structure(
@@ -30,7 +28,8 @@ mock_error_response <- function(status_code, body) {
   )
 }
 
-test_that("handle_http_error correctly handles httr2_http_error with response", {
+test_that("handle_http_error correctly handles httr2_http_error with response (message mode)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Simulate a 400 error
   error_400 <- mock_error_response(400, '{"id":"store.sql_channel.save_channel.exists.app_error","message":"A channel with that name already exists on the same team.","status_code":400}')
 
@@ -47,7 +46,8 @@ test_that("handle_http_error correctly handles httr2_http_error with response", 
 })
 
 
-test_that("handle_http_error correctly handles legacy error structure", {
+test_that("handle_http_error correctly handles legacy error structure (message mode)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Simulate a legacy error structure
   legacy_error <- structure(
     list(
@@ -81,7 +81,8 @@ test_that("handle_http_error correctly handles legacy error structure", {
   expect_message(handle_http_error(legacy_error), "A legacy error occurred")
 })
 
-test_that("handle_http_error handles general HTTP error message properly", {
+test_that("handle_http_error handles general HTTP error message properly (message mode)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Simulate a general error without specific response
   general_error <- structure(
     list(message = "General HTTP error"),
@@ -91,7 +92,8 @@ test_that("handle_http_error handles general HTTP error message properly", {
   expect_message(handle_http_error(general_error), "HTTP error occurred: General HTTP error")
 })
 
-test_that("handle_http_error handles errors with undecodable response body", {
+test_that("handle_http_error handles errors with undecodable response body (message mode)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Mock an error response with an unreadable body (invalid raw content)
   error_unreadable_body <- structure(
     list(
@@ -135,7 +137,8 @@ test_that("handle_http_error handles errors with undecodable response body", {
 })
 
 
-test_that("handle_http_error handles decoding failure in legacy error structure", {
+test_that("handle_http_error handles decoding failure in legacy error structure (message mode)", {
+  withr::local_options(MattermostR.on_error = "message")
   # Simulate a legacy error structure with an unreadable body
   legacy_error_with_unreadable_body <- structure(
     list(

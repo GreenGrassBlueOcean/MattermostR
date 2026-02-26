@@ -4,15 +4,18 @@
 \alias{get_all_teams}
 \title{List all teams in Mattermost}
 \usage{
-get_all_teams(verbose = FALSE, auth = authenticate_mattermost())
+get_all_teams(verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
-\item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
+\item{verbose}{(Logical) If `TRUE`, detailed information about the request
+and response will be printed. Default is `FALSE`.}
 
-\item{auth}{A list containing `base_url` and `headers` for authentication.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-A data frame containing details of all teams.
+A data frame with one row per team (columns include `id`,
+  `display_name`, `name`, `type`, etc.). Returns an empty data frame /
+  list if the user belongs to no teams (with a warning).
 }
 \description{
 List all teams in Mattermost

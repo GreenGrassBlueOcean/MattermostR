@@ -1,4 +1,3 @@
-# File: R/check_mattermost_status.R
 
 #' Check if the Mattermost server is online
 #'
@@ -11,7 +10,7 @@
 #' check_mattermost_status()
 #' }
 #'
-check_mattermost_status <- function(verbose = FALSE, auth = authenticate_mattermost()) {
+check_mattermost_status <- function(verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_mattermost_auth(auth)

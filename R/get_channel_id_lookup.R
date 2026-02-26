@@ -1,5 +1,3 @@
-#File: R/get_channel_id_lookup.R
-
 #' Get Channel ID by Display Name or Name
 #'
 #' This function retrieves the channel ID associated with a specified display name or name

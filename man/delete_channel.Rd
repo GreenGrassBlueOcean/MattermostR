@@ -4,12 +4,7 @@
 \alias{delete_channel}
 \title{Delete a Mattermost channel}
 \usage{
-delete_channel(
-  channel_id,
-  team_id,
-  verbose = FALSE,
-  auth = authenticate_mattermost()
-)
+delete_channel(channel_id, team_id, verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
 \item{channel_id}{The ID of the channel that will be deleted.}
@@ -21,7 +16,8 @@ delete_channel(
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
 \value{
-A list with details about the deletion status.
+A named list with the deletion status as returned by the
+  Mattermost API.
 }
 \description{
 Archives a Mattermost channel.

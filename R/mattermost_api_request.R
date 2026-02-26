@@ -4,6 +4,25 @@
 #' endpoint, and method provided. It handles retries with exponential backoff for
 #' failed requests and supports both regular JSON requests and multipart file uploads.
 #'
+#' @section Rate Limiting:
+#' Requests are proactively throttled via \code{httr2::req_throttle()} at a rate
+#' controlled by \code{getOption("MattermostR.rate_limit", 10)} requests per second.
+#' Set to \code{Inf} to disable throttling. The default of 10 matches
+#' Mattermost's out-of-the-box server setting (configurable in System Console).
+#'
+#' If the server returns HTTP 429 (Too Many Requests), the retry logic reads the
+#' \code{X-Ratelimit-Reset} header to wait exactly the right number of seconds
+#' before retrying.
+#'
+#' @section Error Handling:
+#' By default, HTTP errors and connection failures raise a \code{mattermost_error}
+#' condition (an S3 error class) that can be caught with
+#' \code{tryCatch(..., mattermost_error = function(e) ...)}.
+#'
+#' Set \code{options(MattermostR.on_error = "message")} to revert to the legacy
+#' behaviour where errors are emitted via \code{message()} and the function
+#' returns \code{NULL}.
+#'
 #' @param auth A list containing the `base_url` and `headers` (which includes the authentication token).
 #' @param endpoint A string specifying the API endpoint (e.g., `"/api/v4/teams"`).
 #' @param method A string specifying the HTTP method to use. Options include `"GET"`, `"POST"`, `"PUT"`, and `"DELETE"`.
@@ -13,7 +32,8 @@
 #'
 #' @importFrom httr2 req_perform
 #'
-#' @return The content of the response, usually parsed as JSON, or an error message if the request fails.
+#' @return The content of the response, usually parsed as JSON. On error, raises a
+#'   \code{mattermost_error} condition (default) or returns \code{NULL} (legacy mode).
 #' @export
 mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, multipart = FALSE, verbose = FALSE) {
   # Validate the base_url and headers in the auth object
@@ -57,11 +77,23 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
     }
   }
 
-  # Add retry logic with exponential backoff
+  # Proactive rate limiting — throttle requests to stay under the server's limit.
+  # Default: 10 req/s (Mattermost's out-of-the-box setting).
+  # Set options(MattermostR.rate_limit = Inf) to disable throttling.
+  rate_limit <- getOption("MattermostR.rate_limit", default = 10)
+  if (is.numeric(rate_limit) && length(rate_limit) == 1 && is.finite(rate_limit) && rate_limit > 0) {
+    req <- httr2::req_throttle(req, rate = rate_limit)
+  }
+
+  # Reactive retry logic with exponential backoff.
+  # On 429 (Too Many Requests), mm_after() reads X-Ratelimit-Reset for
+  # precise wait timing; for other transient errors, backoff applies.
   req <- httr2::req_retry(
     req,
-    max_tries = 5,
-    backoff = function(attempt) { 0.5 * 2^(attempt - 1) } # Exponential backoff
+    max_tries    = 5,
+    is_transient = mm_is_transient,
+    after        = mm_after,
+    backoff      = function(attempt) { 0.5 * 2^(attempt - 1) }
   )
 
   # Perform the request and handle errors
@@ -73,12 +105,12 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
       req_perform(req)
     },
     error = function(e) {
-      handle_http_error(e)
+      handle_http_error(e, endpoint = endpoint, method = method)
     }
   )
 
 
-  # If the response is NULL, stop further processing
+  # If the response is NULL (only reachable in "message" mode), stop further processing
   if (is.null(response)) {
     message("No valid response received. Stopping further processing.")
     return(NULL)
@@ -91,15 +123,27 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
     error_content <- httr2::resp_body_string(response)
     content_type <- httr2::resp_content_type(response)
 
-    message("HTTP error occurred: ", status_code, " ", httr2::resp_status_desc(response))
-
+    # Build a descriptive error message
+    detail_msg <- ""
     if (grepl("application/json", content_type)) {
       error_info <- httr2::resp_body_json(response, simplifyVector = TRUE)
-      message("Error details: ", jsonlite::toJSON(error_info, auto_unbox = TRUE, pretty = TRUE))
+      detail_msg <- jsonlite::toJSON(error_info, auto_unbox = TRUE, pretty = TRUE)
     } else {
-      message("Error content: ", error_content)
+      detail_msg <- error_content
     }
-    return(NULL)
+
+    full_msg <- paste0(
+      "HTTP error occurred: ", status_code, " ", httr2::resp_status_desc(response),
+      "\nError details: ", detail_msg
+    )
+
+    return(raise_mattermost_error(
+      msg           = full_msg,
+      status_code   = status_code,
+      response_body = error_content,
+      endpoint      = endpoint,
+      method        = method
+    ))
   }
 
 
@@ -175,4 +219,39 @@ handle_response_content <- function(response, verbose = FALSE) {
   print_response_details(response, body_text)
 
   return(NULL)
+}
+
+
+#' Check if an HTTP response is a transient rate-limit error
+#'
+#' Used as the \code{is_transient} callback for \code{httr2::req_retry()}.
+#' Returns \code{TRUE} for HTTP 429 (Too Many Requests).
+#'
+#' @param resp An httr2 response object.
+#' @return Logical.
+#' @noRd
+mm_is_transient <- function(resp) {
+  httr2::resp_status(resp) == 429
+}
+
+
+#' Extract retry delay from Mattermost rate-limit headers
+#'
+#' Used as the \code{after} callback for \code{httr2::req_retry()}.
+#' Reads the \code{X-Ratelimit-Reset} response header, which Mattermost sets
+#' to the number of seconds remaining before the rate-limit window resets.
+#' Returns that value (plus a small buffer) so httr2 waits the precise amount.
+#' Returns \code{NA} if the header is missing or not numeric, causing httr2
+#' to fall back to the exponential backoff function.
+#'
+#' @param resp An httr2 response object.
+#' @return Numeric seconds to wait, or \code{NA}.
+#' @noRd
+mm_after <- function(resp) {
+  reset <- httr2::resp_header(resp, "X-Ratelimit-Reset")
+  if (is.null(reset)) return(NA)
+  val <- suppressWarnings(as.numeric(reset))
+  if (is.na(val)) return(NA)
+  # Add a small buffer to avoid racing the reset window boundary.
+  max(val + 0.1, 0.1)
 }

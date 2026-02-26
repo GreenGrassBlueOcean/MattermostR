@@ -4,7 +4,7 @@
 \alias{delete_post}
 \title{Delete a specific post in Mattermost}
 \usage{
-delete_post(post_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
+delete_post(post_id = NULL, verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
 \item{post_id}{The ID of the post to delete.}
@@ -14,7 +14,8 @@ delete_post(post_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
 \value{
-Parsed JSON response confirming deletion.
+A named list with the deletion status as returned by the
+  Mattermost API.
 }
 \description{
 Delete a specific post in Mattermost

@@ -1,5 +1,3 @@
-# File: tests/testthat/test-get_all_users.R
-
 library(testthat)
 library(mockery)
 

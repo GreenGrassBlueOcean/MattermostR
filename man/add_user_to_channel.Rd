@@ -7,45 +7,48 @@
 add_user_to_channel(
   channel_id,
   user_id,
+  resolve_names = TRUE,
   verbose = FALSE,
-  auth = authenticate_mattermost()
+  auth = get_default_auth()
 )
 }
 \arguments{
 \item{channel_id}{The ID of the channel to add the user to.}
 
-\item{user_id}{The ID of the user to add. You can use the string "me" to add the authenticated user.}
+\item{user_id}{The ID of the user to add. You can use the string `"me"` to
+add the authenticated user.}
+
+\item{resolve_names}{Logical. If `TRUE` (default), fetches readable
+usernames and channel names for the success message. Set to `FALSE` to
+skip these lookups and save 2 API calls.}
 
 \item{verbose}{Boolean. If `TRUE`, prints the request details.}
 
-\item{auth}{The authentication object created by `authenticate_mattermost()`.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-The raw channel member object (invisibly) for programmatic use.
+The channel member object returned by the API (invisibly).
 }
 \description{
-Adds a user to a specified Mattermost channel. This function resolves the
-IDs into readable names to provide a user-friendly success message.
+Adds a user to a specified Mattermost channel.
+}
+\details{
+By default, the function resolves the user and channel IDs into readable
+names for a user-friendly success message (2 extra API calls). Set
+`resolve_names = FALSE` to skip these lookups and reduce API traffic to a
+single call — useful when adding users in a loop. For true batch operations,
+see [add_users_to_channel()].
 }
 \examples{
 \dontrun{
-  # Authenticate
-  auth <- authenticate_mattermost()
-
-  # Get current user ID
-  me <- get_user_info("me", auth = auth)
-
-  # Get the first team available to the user
-  teams <- get_all_teams(auth = auth)
-  team_id <- teams$id[1]
-
-  # Get channels for this team
-  channels <- get_team_channels(team_id = team_id, auth = auth)
-
-  # Get the channel ID for "Town Square" by name
-  channel_id <- get_channel_id_lookup(channels, name = "town-square")
-
-  # Add current user to that channel
+  # Add current user to a channel (with friendly names)
+  me <- get_user("me", auth = auth)
   add_user_to_channel(channel_id, me$id, auth = auth)
+
+  # Fast path: skip name resolution
+  add_user_to_channel(channel_id, me$id, resolve_names = FALSE, auth = auth)
 }
+}
+\seealso{
+[add_users_to_channel()] for batch operations.
 }

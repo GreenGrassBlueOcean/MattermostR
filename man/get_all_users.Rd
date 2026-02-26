@@ -2,24 +2,27 @@
 % Please edit documentation in R/get_users.R
 \name{get_all_users}
 \alias{get_all_users}
-\title{Get information about a specific Mattermost user}
+\title{Get all known Mattermost users}
 \usage{
-get_all_users(verbose = FALSE, auth = authenticate_mattermost())
+get_all_users(verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
-\item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
+\item{verbose}{(Logical) If `TRUE`, detailed information about the request
+and response will be printed. Default is `FALSE`.}
 
-\item{auth}{The authentication object created by `authenticate_mattermost()`.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-a vector user_ids
+A character vector of user IDs, or a list depending on the
+  Mattermost API response.
 }
 \description{
-Get information about a specific Mattermost user
+Retrieves a list of user IDs for users known to the authenticated user's
+server. The exact format depends on the Mattermost API version; typically
+a character vector of user IDs.
 }
 \examples{
 \dontrun{
- get_all_users()
+  get_all_users()
 }
-
 }

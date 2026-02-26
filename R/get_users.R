@@ -1,18 +1,22 @@
-# File: R/get_users.R
 
-#' Get information about a specific Mattermost user
+#' Get all known Mattermost users
 #'
-#' @param auth The authentication object created by `authenticate_mattermost()`.
-#' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
+#' Retrieves a list of user IDs for users known to the authenticated user's
+#' server. The exact format depends on the Mattermost API version; typically
+#' a character vector of user IDs.
 #'
-#' @return a vector user_ids
+#' @param verbose (Logical) If `TRUE`, detailed information about the request
+#'   and response will be printed. Default is `FALSE`.
+#' @param auth The authentication object created by [authenticate_mattermost()].
+#'
+#' @return A character vector of user IDs, or a list depending on the
+#'   Mattermost API response.
 #' @export
 #' @examples
 #' \dontrun{
-#'  get_all_users()
+#'   get_all_users()
 #' }
-#'
-get_all_users <- function(verbose = FALSE, auth = authenticate_mattermost()){
+get_all_users <- function(verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_mattermost_auth(auth)
@@ -31,20 +35,33 @@ get_all_users <- function(verbose = FALSE, auth = authenticate_mattermost()){
 
 #' Get information about a specific Mattermost user
 #'
-#' @param user_id The ID of the post to delete.
-#' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
-#' @param auth The authentication object created by `authenticate_mattermost()`.
+#' Retrieves detailed information about a user, such as their username, email,
+#' roles, and ID. Use the special string `"me"` as `user_id` to retrieve
+#' information about the currently authenticated user.
 #'
+#' @param user_id A character string containing the Mattermost user ID, or
+#'   `"me"` for the authenticated user.
+#' @param verbose (Logical) If `TRUE`, detailed information about the request
+#'   and response will be printed. Default is `FALSE`.
+#' @param auth The authentication object created by [authenticate_mattermost()].
 #'
-#' @return a vector user_ids
+#' @return A named list with user fields returned by the Mattermost API
+#'   (e.g. `id`, `username`, `email`, `roles`).
 #' @export
 #' @examples
 #' \dontrun{
-#'  users <- get_all_users()
-#'  userinfo <- lapply(users, get_user)
-#' }
+#'   # Get info about a specific user by ID
+#'   user <- get_user("xb123abc456...")
 #'
-get_user <- function(user_id = NULL, verbose = FALSE,auth = authenticate_mattermost()){
+#'   # Get info about the current authenticated user
+#'   myself <- get_user("me")
+#'   print(myself$username)
+#'
+#'   # Iterate over all known users
+#'   users <- get_all_users()
+#'   userinfo <- lapply(users, get_user)
+#' }
+get_user <- function(user_id = NULL, verbose = FALSE, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(user_id, "user_id")
@@ -56,7 +73,8 @@ get_user <- function(user_id = NULL, verbose = FALSE,auth = authenticate_matterm
   response <- mattermost_api_request(
     auth = auth,
     endpoint = endpoint,
-    method = "GET"
+    method = "GET",
+    verbose = verbose
   )
 
   return(response)
@@ -77,7 +95,7 @@ get_user <- function(user_id = NULL, verbose = FALSE,auth = authenticate_matterm
 #' \dontrun{
 #'  get_me()
 #' }
-get_me <- function(verbose = TRUE, auth = authenticate_mattermost()){
+get_me <- function(verbose = FALSE, auth = get_default_auth()){
 
   # Check required input for completeness
   check_mattermost_auth(auth)

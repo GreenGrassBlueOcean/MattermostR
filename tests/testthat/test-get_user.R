@@ -20,7 +20,7 @@ test_that("get_user() works as expected", {
   mockery::stub(get_user, 'check_mattermost_auth', function(auth) {})
 
   # Mock mattermost_api_request to simulate a successful API response
-  mockery::stub(get_user, 'mattermost_api_request', function(auth, endpoint, method) {
+  mockery::stub(get_user, 'mattermost_api_request', function(auth, endpoint, method, verbose) {
     mock_response
   })
 
@@ -28,7 +28,7 @@ test_that("get_user() works as expected", {
   expect_equal(result, mock_response)
 
   # 5. Test case: Invalid user_id (simulating a failed API request)
-  mockery::stub(get_user, 'mattermost_api_request', function(auth, endpoint, method) {
+  mockery::stub(get_user, 'mattermost_api_request', function(auth, endpoint, method, verbose) {
     stop("User not found")
   })
 

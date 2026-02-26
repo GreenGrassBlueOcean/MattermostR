@@ -1,4 +1,3 @@
-# File: R/delete_channel.R
 
 #' Delete a Mattermost channel
 #'
@@ -17,7 +16,8 @@
 #' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
 #'
-#' @return A list with details about the deletion status.
+#' @return A named list with the deletion status as returned by the
+#'   Mattermost API.
 #' @export
 #' @examples
 #' \dontrun{
@@ -29,7 +29,7 @@
 #' # Now delete the channel
 #' info <- delete_channel(channel_id = new_channel$id, team_id = teams$id)
 #' }
-delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = authenticate_mattermost()) {
+delete_channel <- function(channel_id, team_id, verbose = FALSE, auth = get_default_auth()) {
   # Check if channel_id is NULL or empty
   if (is.null(channel_id) || !nzchar(channel_id)) {
     stop("channel_id cannot be empty or NULL")

@@ -10,7 +10,7 @@ create_channel(
   display_name = NULL,
   type = "O",
   verbose = FALSE,
-  auth = authenticate_mattermost()
+  auth = get_default_auth()
 )
 }
 \arguments{
@@ -27,7 +27,8 @@ create_channel(
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
 \value{
-A list with details about the created channel.
+A named list with the created channel's fields (e.g. `id`,
+  `display_name`, `name`, `type`, `team_id`).
 }
 \description{
 Create a new Mattermost channel

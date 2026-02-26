@@ -11,208 +11,228 @@ coverage](https://codecov.io/gh/GreenGrassBlueOcean/MattermostR/graph/badge.svg)
 
 <!-- badges: end -->
 
-# MattermostR
-
-MattermostR is an R package designed to interact with the Mattermost API
-for sending messages, managing channels, uploading files, and more. The
-package includes functionality for automating interactions with
-Mattermost from R scripts, allowing you to easily send messages, upload
-attachments, and manage teams and channels.
+MattermostR is an R package for interacting with the [Mattermost REST
+API v4](https://api.mattermost.com/). It covers messaging, file
+management, channel and team administration, reactions, bots, slash
+commands, and more.
 
 ## Installation
 
-You can install the MattermostR package from GitHub:
-
 ``` r
-# Install the devtools package if you don't have it already
-install.packages("devtools")
-
-# Install MattermostR
+# Install from GitHub
 devtools::install_github("GreenGrassBlueOcean/MattermostR")
 ```
 
-## Features
+## Authentication
 
-### 1. Send Messages with Priority
-
-Send messages to Mattermost channels with optional priorities: -
-**Normal** - **High** - **Low**
-
-The priority is automatically normalized in the
-`send_mattermost_message()` function, so you don’t need to worry about
-case sensitivity (e.g., `high`, `HIGH`, and `High` are all valid).
-
-### 2. Attach Files to Messages
-
-You can attach files to your messages by specifying a file path. The
-file is first uploaded to the Mattermost server, and its file ID is
-included in the message.
-
-Example:
+Authenticate with a bearer token (recommended) or username/password.
+Credentials are resolved from environment variables first, then R
+options.
 
 ``` r
-response <- send_mattermost_message(
-  channel_id = channel_id, 
-  message = "Here is your file!", 
-  file_path = "output.txt", 
-  verbose = TRUE
+# Token-based (recommended)
+auth <- authenticate_mattermost(
+  base_url = "https://your-mattermost.example.com",
+  token    = "your-token"
+)
+
+# Or store credentials in environment variables to avoid passing auth everywhere:
+# MATTERMOST_URL=https://your-mattermost.example.com
+# MATTERMOST_TOKEN=your-token
+```
+
+## Sending Messages
+
+### Basic message
+
+``` r
+send_mattermost_message(
+  channel_id = "your-channel-id",
+  message    = "Hello, Mattermost!",
+  auth       = auth
 )
 ```
 
-### 3. Send Plots as Attachments
-
-You can now directly send plots as attachments to your Mattermost
-messages. Supported plot types include:
-
-- ggplot2 objects
-- R expressions (e.g., quote(plot(cars)))
-- Functions that generate plots (e.g., function() plot(cars))
-
-The plots are automatically saved as .png files and uploaded to the
-Mattermost server.
-
-Example:
+### Message with priority
 
 ``` r
-# Define some plots
+send_mattermost_message(
+  channel_id = "your-channel-id",
+  message    = "Urgent update!",
+  priority   = "Urgent",   # "Normal" (default), "Important", or "Urgent"
+  auth       = auth
+)
+```
+
+### Reply in a thread
+
+``` r
+send_mattermost_message(
+  channel_id = "your-channel-id",
+  message    = "This is a thread reply.",
+  root_id    = "parent-post-id",
+  auth       = auth
+)
+```
+
+### Attach a file or plot
+
+``` r
 library(ggplot2)
 
-plot1 <- ggplot(mtcars, aes(x = wt, y = mpg)) +
-  geom_point()
+p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
 
-plot2 <- function() plot(cars)
+send_mattermost_message(
+  channel_id = "your-channel-id",
+  message    = "Here is the plot.",
+  plots      = list(p),
+  auth       = auth
+)
+```
 
-# Send a message with plot attachments
-response <- send_mattermost_message(
-  channel_id = channel_id,
-  message = "Here are some plots!",
-  plots = list(plot1, plot2),
-  plot_name = c("scatterplot.png", "lineplot"),
-  verbose = TRUE,
+### Incoming webhooks (no auth required)
+
+``` r
+send_webhook_message(
+  webhook_url = "https://your-mattermost.example.com/hooks/your-hook-id",
+  message     = "Automated notification from R."
+)
+```
+
+## Managing Posts
+
+``` r
+# Edit an existing post
+update_post(post_id = "post-id", message = "Corrected text.", auth = auth)
+
+# Delete a post
+delete_post(post_id = "post-id", auth = auth)
+
+# Delete all posts in a channel older than a given date
+delete_old_messages(
+  channel_id = "your-channel-id",
+  before_date = "2024-01-01",
   auth = auth
 )
 ```
 
-### 4. Manage Teams and Channels
-
-The package provides tools for managing channels and teams:
-
-1.List Channels and Groups: Retrieve all channels and groups from a
-team.  
-2.Create Channels: Programmatically create new channels in a team.  
-3.Delete Channels: Delete existing channels.  
-4.Look Up Channels by Name: Find a specific channel by name and get its
-ID.
-
-### 5. Search Posts
-
-Robust search functionality allows you to query message history. This
-includes:
-
-1.Filtering by Team, Channel, or User.  
-2.Date range filtering (before/after).  
-3.Handling pagination and integer overflow for large datasets.
-
-Note: The API usually requires the bot/user to be a member of the
-channel to search it.
+## Reactions & Pins
 
 ``` r
-# 1. Authenticate
-auth <- authenticate_mattermost(
-  base_url = "https://yourmattermost.stackhero-network.com", 
-  token = "your-token"
+# Emoji reactions
+add_reaction(post_id = "post-id", emoji_name = "thumbsup", auth = auth)
+get_reactions(post_id = "post-id", auth = auth)
+remove_reaction(post_id = "post-id", emoji_name = "thumbsup", auth = auth)
+
+# Pin / unpin a post
+pin_post(post_id = "post-id", auth = auth)
+unpin_post(post_id = "post-id", auth = auth)
+```
+
+## Searching and Retrieving Posts
+
+``` r
+# Retrieve posts from a channel (paginated)
+posts <- get_channel_posts(channel_id = "your-channel-id", auth = auth)
+
+# Search message history
+results <- search_posts(
+  terms       = "important update",
+  team_id     = "your-team-id",
+  in_channels = "your-channel-id",
+  after_date  = "2024-01-01",
+  auth        = auth
 )
+```
 
-# 2. Get your user ID (for joining channels) and Team ID
-me <- get_user_info("me", auth = auth)
-teams <- get_all_teams(auth = auth)
-team_id <- teams$id[1] # Select the first team
+## Managing Channels
 
-# 3. Find a channel and ensure the bot is a member
-# (Search often fails if the bot hasn't explicitly joined the channel)
-channels <- get_team_channels(team_id = team_id, auth = auth)
+``` r
+# List channels in a team
+channels <- get_team_channels(team_id = "your-team-id", auth = auth)
+
+# Look up a channel ID by name
 channel_id <- get_channel_id_lookup(channels, name = "town-square")
 
-add_user_to_channel(channel_id, me$id, auth = auth)
-
-# 4. Perform the Search
-results <- search_posts(
-  terms = "important update",
-  team_id = team_id,
-  in_channels = channel_id,
-  after_date = "2024-01-01",
-  per_page = 100,
-  verbose = TRUE,
-  auth = auth
+# Create channels
+create_channel(
+  team_id      = "your-team-id",
+  name         = "new-channel",
+  display_name = "New Channel",
+  auth         = auth
 )
 
-# View results
-head(results)
-```
-
-### 6. Authentication
-
-Authenticate with the Mattermost API using a bearer token or by
-providing your username and password. Once authenticated, the token is
-stored for future API calls.
-
-``` r
-auth <- authenticate_mattermost(
-  base_url = "https://yourmattermost.stackhero-network.com", 
-  token = "your-token"
-)
-```
-
-### 7. Error Handling and Validation
-
-Priority Validation: Before sending a message, the priority is validated
-to ensure that it’s one of Normal, High, or Low. If an invalid priority
-is provided, the function will return an error. Input Validation:
-Ensures that required fields (such as channel_id and message) are
-provided before making API calls.
-
-## Usage
-
-### Sending a Message
-
-``` r
-# Authenticate
-auth <- authenticate_mattermost(base_url = "https://yourmattermost.stackhero-network.com", token = "your-token")
-
-# Send a message to a channel
-response <- send_mattermost_message(
-  channel_id = "your-channel-id", 
-  message = "Hello, Mattermost!", 
-  priority = "High", 
-  verbose = TRUE
-)
-```
-
-### Sending a Message with a File
-
-``` r
-# Send a message with a file attachment
-response <- send_mattermost_message(
-  channel_id = "your-channel-id", 
-  message = "Here is a file attachment", 
-  file_path = "path/to/file.txt", 
-  verbose = TRUE
-)
-```
-
-### Managing Channels
-
-``` r
-# List all channels in a team
-channels <- get_team_channels(team_id = "your-team-id")
-
-# Create a new channel
-create_mattermost_channel(team_id = "your-team-id", channel_name = "new-channel", channel_display_name = "New Channel")
+# Direct message or group message channel
+create_direct_channel(user_ids = c("user-id-1", "user-id-2"), auth = auth)
 
 # Delete a channel
-delete_mattermost_channel(channel_id = "your-channel-id")
+delete_channel(channel_id = "channel-id", team_id = "your-team-id", auth = auth)
+
+# Channel membership
+add_user_to_channel(channel_id = "channel-id", user_id = "user-id", auth = auth)
+add_users_to_channel(channel_id = "channel-id", user_ids = c("uid1", "uid2"), auth = auth)
+get_channel_members(channel_id = "channel-id", auth = auth)
+remove_channel_member(channel_id = "channel-id", user_id = "user-id", auth = auth)
+```
+
+## Teams and Users
+
+``` r
+# Teams
+teams   <- get_all_teams(auth = auth)
+team    <- get_team(team_id = "your-team-id", auth = auth)
+
+# Users
+me      <- get_me(auth = auth)
+user    <- get_user(user_id = "user-id", auth = auth)
+all_users <- get_all_users(auth = auth)
+
+# User status
+get_user_status(user_id = "user-id", auth = auth)
+set_user_status(user_id = "user-id", status = "away", auth = auth)
+```
+
+## Files
+
+``` r
+# Download a file
+get_mattermost_file(file_id = "file-id", dest_path = "local/file.png", auth = auth)
+```
+
+## Bots
+
+``` r
+bot <- create_bot(username = "mybot", display_name = "My Bot", auth = auth)
+get_bots(auth = auth)
+disable_bot(bot_user_id = bot$user_id, auth = auth)
+enable_bot(bot_user_id = bot$user_id, auth = auth)
+```
+
+## Slash Commands
+
+``` r
+cmd <- create_command(
+  team_id      = "your-team-id",
+  trigger      = "remind",
+  url          = "https://your-handler.example.com/remind",
+  display_name = "Remind",
+  auth         = auth
+)
+
+list_commands(team_id = "your-team-id", auth = auth)
+delete_command(command_id = cmd$id, auth = auth)
+```
+
+## Error Handling
+
+By default, HTTP errors raise a `mattermost_error` condition (stops
+execution). Switch to the legacy silent mode if you prefer `NULL`
+returns:
+
+``` r
+options(MattermostR.on_error = "message")
 ```
 
 ## License
 
-This project is licensed under the MIT License.
+MIT

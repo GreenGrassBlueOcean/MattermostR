@@ -4,17 +4,19 @@
 \alias{get_team}
 \title{Get data of a single team from its team_id}
 \usage{
-get_team(team_id = NULL, verbose = FALSE, auth = authenticate_mattermost())
+get_team(team_id = NULL, verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
-\item{team_id}{The ID of the Mattermost team.}
+\item{team_id}{A character string containing the Mattermost team ID.}
 
-\item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
+\item{verbose}{(Logical) If `TRUE`, detailed information about the request
+and response will be printed. Default is `FALSE`.}
 
-\item{auth}{A list containing `base_url` and `headers` for authentication.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-A data frame containing details of a team.
+A named list with team fields returned by the Mattermost API
+  (e.g. `id`, `display_name`, `name`, `type`).
 }
 \description{
 Get data of a single team from its team_id

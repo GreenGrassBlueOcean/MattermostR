@@ -4,17 +4,19 @@
 \alias{get_channel_info}
 \title{Get information about a Mattermost channel}
 \usage{
-get_channel_info(channel_id, verbose = FALSE, auth = authenticate_mattermost())
+get_channel_info(channel_id, verbose = FALSE, auth = get_default_auth())
 }
 \arguments{
-\item{channel_id}{The Mattermost channel ID.}
+\item{channel_id}{A character string containing the Mattermost channel ID.}
 
-\item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
+\item{verbose}{(Logical) If `TRUE`, detailed information about the request
+and response will be printed. Default is `FALSE`.}
 
-\item{auth}{The authentication object created by `authenticate_mattermost()`.}
+\item{auth}{The authentication object created by [authenticate_mattermost()].}
 }
 \value{
-Parsed JSON response with channel information.
+A named list with channel fields returned by the Mattermost API
+  (e.g. `id`, `display_name`, `name`, `type`, `team_id`).
 }
 \description{
 Get information about a Mattermost channel
