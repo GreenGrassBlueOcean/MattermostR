@@ -289,6 +289,7 @@ send_mattermost_message <- function(channel_id, message, priority = "Normal",
 #'
 #' @param priority A string representing the priority.
 #' @return A string with the corrected priority format.
+#' @noRd
 normalize_priority <- function(priority) {
   priority_lowered <- tolower(priority)  # Convert to lower case for normalization
 

@@ -159,6 +159,7 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
 #' @param verbose Boolean. If `TRUE`, the function will print the response details for more information.
 #'
 #' @return The response object if the content type is JSON, or a warning if it's not.
+#' @noRd
 handle_response_content <- function(response, verbose = FALSE) {
 
   # Safely retrieve content type with tryCatch
