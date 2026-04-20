@@ -9,5 +9,6 @@ README.Rmd
 inst/figures/mattermost.svg
 docs
 MattermostR.Rproj
-AGENTS.md
-architecture.md
+AGENTS.
+architecture_MattermostR.md
+.positai

@@ -147,6 +147,29 @@ test_that("mattermost_api_request() handles multipart requests (Lines 53-54)", {
   expect_null(res)
 })
 
+test_that("mattermost_api_request() sets Content-Type conditionally based on multipart flag", {
+  captured_req <- NULL
+  mock_perform <- function(req) {
+    captured_req <<- req
+    mock_response_factory(200)
+  }
+  stub(mattermost_api_request, "req_perform", mock_perform)
+
+  # Case 1: multipart = FALSE (default)
+  mattermost_api_request(auth = mock_auth, endpoint = "/test")
+  expect_equal(captured_req$headers$`Content-Type`, "application/json")
+
+  # Case 2: multipart = TRUE
+  mattermost_api_request(
+    auth = mock_auth,
+    endpoint = "/files",
+    method = "POST",
+    body = list(file = "dummy_content"),
+    multipart = TRUE
+  )
+  expect_null(captured_req$headers$`Content-Type`)
+})
+
 test_that("mattermost_api_request() handles NULL response in message mode (Lines 83-84)", {
   withr::local_options(MattermostR.on_error = "message")
   # Stub req_perform to return NULL directly

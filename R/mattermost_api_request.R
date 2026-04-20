@@ -48,11 +48,18 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
   req <- httr2::request(url)
 
   # Construct headers
-  headers <- list(
-    Authorization = auth$headers,
-    `Content-Type` = "application/json",
-    Accept = "application/json"
-  )
+  if (!multipart) {
+    headers <- list(
+      Authorization = auth$headers,
+      `Content-Type` = "application/json",
+      Accept = "application/json"
+    )
+  } else {
+    headers <- list(
+      Authorization = auth$headers,
+      Accept = "application/json"
+    )
+  }
 
   # Add headers
   req <- httr2::req_headers(req, !!!headers)

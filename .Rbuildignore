@@ -7,4 +7,7 @@
 ^docs$
 ^pkgdown$
 ^AGENTS\.md$
-^architecture\.md$
+^architecture_MattermostR\.md$
+^\.positai$
+^\.claude$
+^README\.html$
