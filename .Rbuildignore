@@ -11,3 +11,5 @@
 ^\.positai$
 ^\.claude$
 ^README\.html$
+^doc$
+^Meta$

@@ -9,7 +9,6 @@ Description: This package provides tools for interacting with Mattermost's API.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
 Imports: 
     curl,
     httr2,
@@ -21,7 +20,11 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     ggplot2,
-    officer
+    officer,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
 Depends: R (>= 4.1.0)
 URL: https://greengrassblueocean.github.io/MattermostR/
+Config/roxygen2/version: 8.0.0

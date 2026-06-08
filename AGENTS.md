@@ -4,9 +4,10 @@ This file provides quick-start context for AI assistants working in this reposit
 
 ## What This Is
 
-**MattermostR** is an R package (v0.1.0) wrapping the Mattermost REST API v4.
+**MattermostR** is an R package (v0.2.0) wrapping the Mattermost REST API v4
+and the Agents v2.0 plugin API.
 It provides R-native functions for messaging, file management, channel operations,
-team administration, and search.
+team administration, search, and AI agent invocation.
 
 - **Repo**: [GreenGrassBlueOcean/MattermostR](https://github.com/GreenGrassBlueOcean/MattermostR)
 - **Docs**: <https://greengrassblueocean.github.io/MattermostR/>
@@ -34,6 +35,9 @@ team administration, and search.
 | `R/channel_members.R` | `get_channel_members()` + `remove_channel_member()` — channel membership |
 | `R/bots.R` | `create_bot()`, `get_bot()`, `get_bots()`, `update_bot()`, `disable_bot()`, `enable_bot()`, `assign_bot()` — bot account management |
 | `R/commands.R` | `create_command()`, `get_command()`, `list_commands()`, `update_command()`, `delete_command()`, `execute_command()`, `regen_command_token()` — slash commands |
+| `R/plugin_api.R` | Plugin transport — `plugin_api_request()` routes through `mattermost_api_request()` with `/plugins/<id>/api/v1` prefix; `get_agents_plugin_id()` |
+| `R/agents.R` | `list_agents()`, `get_agent()`, `create_agent()`, `update_agent()`, `delete_agent()` — AI agent CRUD with full v2.0 schema |
+| `R/invoke_agent.R` | `invoke_agent()` — synchronous LLM completion via the Agents plugin with system prompt, multi-turn context, and extended timeout support |
 | `R/get_channel_posts.R` | Posts → data.frame; paginated via `page`/`per_page`/`since` |
 | `R/paginate_api.R` | Internal `paginate_api()` — auto-pagination for GET endpoints with `page`/`per_page` |
 | `R/utils.R` | `check_not_null()` input validation |
@@ -110,6 +114,8 @@ No live Mattermost server is needed.
 - `add_user_to_channel()` supports `resolve_names = FALSE` to skip display-only lookups (1 API call instead of 3).
 - `add_users_to_channel()` is the batch variant — uses `user_ids` array (max 1000), single POST. With `resolve_names = TRUE`, uses batch `POST /api/v4/users/ids` (always 3 calls total).
 - **`paginate_api()`** is the internal auto-pagination helper. Iterates `page`/`per_page` query params (max 200/page). Accepts optional `transform` callback for nested responses (e.g. posts endpoint). Used by `get_all_teams()`, `get_team_channels()`, and `get_all_channel_posts()`.
+- **Plugin API transport**: `plugin_api_request()` constructs `/plugins/<plugin_id>/api/v1/<path>` endpoints and delegates to `mattermost_api_request()`, inheriting rate-limiting, retry, and error handling. Plugin ID is configurable via `options(MattermostR.agents_plugin_id)`, defaulting to `"mattermost-ai-agents"`.
+- **`invoke_agent()`** supports extended `timeout` (default 120s) for LLM completions and `...` for forward-compatible experimental fields.
 
 ---
 
@@ -132,3 +138,4 @@ High-value work not yet implemented:
 | ~~P3~~ | ~~Channel members~~ | **Done** — `get_channel_members()` (paginated), `remove_channel_member()` |
 | ~~P3~~ | ~~Bot accounts~~ | **Done** — `create_bot()`, `get_bot()`, `get_bots()`, `update_bot()`, `disable_bot()`, `enable_bot()`, `assign_bot()` |
 | ~~P3~~ | ~~Slash commands~~ | **Done** — `create_command()`, `get_command()`, `list_commands()`, `update_command()`, `delete_command()`, `execute_command()`, `regen_command_token()` |
+| ~~P1~~ | ~~Agents plugin API~~ | **Done** — `list_agents()`, `get_agent()`, `create_agent()`, `update_agent()`, `delete_agent()`, `invoke_agent()` with full v2.0 schema (reasoning, tools, vision, structured output) |

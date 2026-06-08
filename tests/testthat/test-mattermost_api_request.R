@@ -327,3 +327,17 @@ test_that("mattermost_api_request() uses default throttle (10/s) when option is 
   # Default 10 req/s should apply throttle
   expect_true(!is.null(captured_req$policies$throttle_realm))
 })
+
+test_that("mattermost_api_request() sets req_timeout when timeout parameter is provided", {
+  captured_req <- NULL
+  stub(mattermost_api_request, "req_perform", function(req) {
+    captured_req <<- req
+    mock_response_factory(200, content_type = "application/json")
+  })
+
+  res <- mattermost_api_request(auth = mock_auth, endpoint = "/timeout-test", timeout = 45)
+
+  # req_timeout sets captured_req$options$timeout_ms
+  expect_equal(captured_req$options$timeout_ms, 45000)
+})
+

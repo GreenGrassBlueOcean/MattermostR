@@ -10,6 +10,7 @@ mattermost_api_request(
   method = "GET",
   body = NULL,
   multipart = FALSE,
+  timeout = NULL,
   verbose = FALSE
 )
 }
@@ -23,6 +24,12 @@ mattermost_api_request(
 \item{body}{(Optional) A list or object representing the body of the request (e.g., for `POST` or `PUT` requests).}
 
 \item{multipart}{(Logical) Set to `TRUE` if the request includes multipart data (e.g., file upload).}
+
+\item{timeout}{(Numeric or NULL) Optional request timeout in seconds. When
+\code{NULL} (default), no explicit timeout is set and the system default
+applies. Set to a positive number for long-running requests such as LLM
+completions via the Agents plugin, where response times of 30--120 seconds
+are common.}
 
 \item{verbose}{(Logical) If `TRUE`, detailed information about the request and response will be printed.}
 }

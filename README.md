@@ -223,6 +223,34 @@ list_commands(team_id = "your-team-id", auth = auth)
 delete_command(command_id = cmd$id, auth = auth)
 ```
 
+## AI Agents (v2.0 Plugin API)
+
+Discover, configure, and invoke AI agents (Grok, Gemini, Perplexity,
+etc.) integrated with Mattermost via the Agents v2.0 plugin:
+
+``` r
+# 1. Discover available agents
+agents <- list_agents(auth = auth)
+
+# 2. Invoke an agent synchronously
+response <- invoke_agent(
+  bot_user_id = "bot-user-id-for-agent",
+  message     = "What was the ECB's interest rate decision?",
+  auth        = auth
+)
+cat(response$message)
+
+# 3. Create a new agent bound to a bot account
+agent <- create_agent(
+  bot_user_id       = "bot-user-id",
+  display_name      = "Quant Expert",
+  instructions      = "You are a quantitative finance advisor.",
+  model             = "grok-3",
+  reasoning_enabled = TRUE, # Enable reasoning (v2.0 plugin feature)
+  auth              = auth
+)
+```
+
 ## Error Handling
 
 By default, HTTP errors raise a `mattermost_error` condition (stops

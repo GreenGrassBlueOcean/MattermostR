@@ -22,7 +22,7 @@ mock_api_request_helper <- function(fake_data = list()) {
 
 sub_everything <- function() {
   # Helper function to mock Mattermost API responses
-  mock_mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, multipart = FALSE, verbose = FALSE) {
+  mock_mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, multipart = FALSE, timeout = NULL, verbose = FALSE) {
     list(
       success = TRUE,
       method = method,
@@ -57,6 +57,17 @@ sub_everything <- function() {
                          "send_mattermost_file", "send_mattermost_message",
                          "set_user_status", "unpin_post",
                          "update_bot", "update_command", "update_post")
+
+  # Agent/plugin functions that delegate to plugin_api_request
+  mock_plugin_api_request <- function(auth, plugin_id, path, method = "GET",
+                                      body = NULL, timeout = NULL, verbose = FALSE) {
+    list(success = TRUE, method = method, path = path, body = body)
+  }
+  agent_functions <- c("list_agents", "get_agent", "create_agent",
+                       "update_agent", "delete_agent", "invoke_agent")
+  for (fun_name in agent_functions) {
+    mockery::stub(where = fun_name, what = "plugin_api_request", how = mock_plugin_api_request)
+  }
 
   for (fun_name in functions_to_mock) {
     mockery::stub(where = fun_name, what = "mattermost_api_request", how = mock_mattermost_api_request)

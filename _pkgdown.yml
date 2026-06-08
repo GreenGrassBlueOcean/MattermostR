@@ -2,6 +2,11 @@ url: https://greengrassblueocean.github.io/MattermostR/
 template:
   bootstrap: 5
 
+articles:
+  - title: Vignettes
+    contents:
+      - ai-agents
+
 reference:
   - title: Authentication
     desc: Authenticate with the Mattermost API and manage credentials.
@@ -91,6 +96,17 @@ reference:
       - delete_command
       - execute_command
       - regen_command_token
+
+  - title: AI Agents (Plugin)
+    desc: Interact with the Mattermost Agents v2.0 plugin for AI completions.
+    contents:
+      - list_agents
+      - get_agent
+      - create_agent
+      - update_agent
+      - delete_agent
+      - invoke_agent
+      - get_agents_plugin_id
 
   - title: Low-level / Developer
     desc: Direct API access and server utilities.

@@ -1,3 +1,22 @@
+# MattermostR 0.2.0.9001
+
+## New features
+
+### AI Agents (Plugin)
+- `list_agents()` — discover all AI agents configured on the server.
+- `get_agent()` — retrieve a single agent's configuration.
+- `create_agent()` — create an AI agent with full v2.0 schema support: model, reasoning controls, tool policy, vision, and structured output.
+- `update_agent()` — partially update an agent's configuration.
+- `delete_agent()` — remove an agent (bot account is unaffected).
+- `invoke_agent()` — send a prompt to an AI agent and receive a synchronous LLM completion. Supports system prompts, multi-turn context, extended timeouts for reasoning models, and forward-compatible `...` for experimental fields.
+- `get_agents_plugin_id()` — resolve the plugin ID (configurable via `options(MattermostR.agents_plugin_id)`).
+
+## Improvements
+
+- `mattermost_api_request()` gains an optional `timeout` parameter for long-running requests (e.g. LLM completions that routinely take 30–120+ seconds).
+
+---
+
 # MattermostR 0.2.0
 
 ## New functions

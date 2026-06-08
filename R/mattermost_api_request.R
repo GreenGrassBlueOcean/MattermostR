@@ -28,6 +28,11 @@
 #' @param method A string specifying the HTTP method to use. Options include `"GET"`, `"POST"`, `"PUT"`, and `"DELETE"`.
 #' @param body (Optional) A list or object representing the body of the request (e.g., for `POST` or `PUT` requests).
 #' @param multipart (Logical) Set to `TRUE` if the request includes multipart data (e.g., file upload).
+#' @param timeout (Numeric or NULL) Optional request timeout in seconds. When
+#'   \code{NULL} (default), no explicit timeout is set and the system default
+#'   applies. Set to a positive number for long-running requests such as LLM
+#'   completions via the Agents plugin, where response times of 30--120 seconds
+#'   are common.
 #' @param verbose (Logical) If `TRUE`, detailed information about the request and response will be printed.
 #'
 #' @importFrom httr2 req_perform
@@ -35,7 +40,7 @@
 #' @return The content of the response, usually parsed as JSON. On error, raises a
 #'   \code{mattermost_error} condition (default) or returns \code{NULL} (legacy mode).
 #' @export
-mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, multipart = FALSE, verbose = FALSE) {
+mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, multipart = FALSE, timeout = NULL, verbose = FALSE) {
   # Validate the base_url and headers in the auth object
   if (is.null(auth$base_url) || is.null(auth$headers)) {
     stop("Authentication details are incomplete. Please provide a valid base_url and Authorization token.")
@@ -102,6 +107,11 @@ mattermost_api_request <- function(auth, endpoint, method = "GET", body = NULL, 
     after        = mm_after,
     backoff      = function(attempt) { 0.5 * 2^(attempt - 1) }
   )
+
+  # Optional timeout — useful for long-running requests such as LLM completions.
+  if (!is.null(timeout) && is.numeric(timeout) && timeout > 0) {
+    req <- httr2::req_timeout(req, timeout)
+  }
 
   # Perform the request and handle errors
   response <- tryCatch(
