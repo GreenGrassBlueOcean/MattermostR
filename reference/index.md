@@ -148,6 +148,25 @@ Register and manage slash commands.
 - [`regen_command_token()`](https://greengrassblueocean.github.io/MattermostR/reference/regen_command_token.md)
   : Regenerate a command token
 
+## AI Agents (Plugin)
+
+Interact with the Mattermost Agents v2.0 plugin for AI completions.
+
+- [`list_agents()`](https://greengrassblueocean.github.io/MattermostR/reference/list_agents.md)
+  : List AI agents
+- [`get_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agent.md)
+  : Get a single AI agent
+- [`create_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/create_agent.md)
+  : Create an AI agent
+- [`update_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/update_agent.md)
+  : Update an AI agent
+- [`delete_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_agent.md)
+  : Delete an AI agent
+- [`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+  : Invoke an AI agent
+- [`get_agents_plugin_id()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agents_plugin_id.md)
+  : Get the Agents Plugin ID
+
 ## Low-level / Developer
 
 Direct API access and server utilities.

@@ -1,0 +1,376 @@
+# Getting Started with AI Agents
+
+MattermostR provides a complete R interface to the **Mattermost Agents
+v2.0** plugin, letting you discover, configure, and invoke AI agents
+(Grok, Gemini, Perplexity, and others) directly from R.
+
+This vignette covers:
+
+1.  How the plugin transport works
+2.  Discovering agents on the server
+3.  Creating agents with v2.0 configuration options
+4.  Invoking agents for LLM completions
+5.  Multi-turn conversations
+6.  Best practices for automated pipelines
+
+## Prerequisites
+
+You need a Mattermost server (v11.5+) with the **Agents** plugin
+installed and at least one LLM service configured by your server
+administrator.
+
+``` r
+
+library(MattermostR)
+
+# Authenticate (or set MATTERMOST_TOKEN and MATTERMOST_URL env vars)
+auth <- authenticate_mattermost(
+  base_url = "https://your-mattermost.example.com",
+  token    = "your-token"
+)
+```
+
+## Architecture: How the Plugin Transport Works
+
+MattermostR talks to the Agents plugin through the same HTTP stack used
+for the core API. Under the hood, `plugin_api_request()` prefixes every
+request with `/plugins/<plugin_id>/api/v1`, then delegates to
+[`mattermost_api_request()`](https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.md)
+— inheriting rate-limiting, retry with exponential backoff, and
+structured `mattermost_error` conditions for free.
+
+    ┌──────────────────────────────┐
+    │ invoke_agent()               │ ← User function
+    │ create_agent(), list_agents()│
+    └──────────┬───────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────┐
+    │ plugin_api_request()         │ ← Constructs plugin path
+    │  /plugins/<id>/api/v1/...    │
+    └──────────┬───────────────────┘
+               │
+               ▼
+    ┌──────────────────────────────┐
+    │ mattermost_api_request()     │ ← Core HTTP handler
+    │  Rate-limit, retry, errors   │
+    └──────────────────────────────┘
+
+The plugin ID defaults to `"mattermost-ai-agents"` and can be overridden
+system-wide:
+
+``` r
+
+# Check the current plugin ID
+get_agents_plugin_id()
+
+# Override if your server uses a different plugin identifier
+options(MattermostR.agents_plugin_id = "com.mattermost.plugin-ai")
+```
+
+## Discovering Agents
+
+Use
+[`list_agents()`](https://greengrassblueocean.github.io/MattermostR/reference/list_agents.md)
+to retrieve all configured agents on the server:
+
+``` r
+
+agents <- list_agents(auth = auth)
+print(agents)
+#>            id   bot_user_id  display_name          model reasoning_enabled
+#> 1  agent_abc1  bot_user_001          Grok         grok-3              TRUE
+#> 2  agent_abc2  bot_user_002        Gemini  gemini-2.0-f.             FALSE
+#> 3  agent_abc3  bot_user_003    Perplexity  sonar-pro-...              TRUE
+```
+
+Retrieve a single agent’s full configuration:
+
+``` r
+
+agent <- get_agent("agent_abc1", auth = auth)
+agent$display_name
+#> [1] "Grok"
+agent$reasoning_enabled
+#> [1] TRUE
+agent$model
+#> [1] "grok-3"
+```
+
+## Creating an Agent
+
+Create an agent by binding it to an existing bot account. The v2.0
+schema supports reasoning controls, tool policy, vision, and structured
+output:
+
+``` r
+
+# First, create a bot (if one doesn't already exist)
+bot <- create_bot(
+  username     = "quant-copilot",
+  display_name = "Quant Copilot",
+  auth         = auth
+)
+
+# Then create an agent using that bot
+agent <- create_agent(
+  bot_user_id  = bot$user_id,
+  display_name = "Quant Copilot",
+  instructions = paste(
+    "You are a quantitative finance assistant.",
+    "Explain financial implications in 3 short bullet points.",
+    "Be cynical and objective. Format in Markdown."
+  ),
+  model              = "grok-3",
+  reasoning_enabled  = TRUE,
+  reasoning_effort   = "medium",
+  disable_tools      = TRUE,   # Recommended for automated pipelines
+  auth               = auth
+)
+```
+
+### Key Parameters
+
+| Parameter | Default | Description |
+|:---|:---|:---|
+| `reasoning_enabled` | `TRUE` | Enable extended thinking (longer but deeper responses) |
+| `reasoning_effort` | `NULL` | `"low"`, `"medium"`, or `"high"` (provider-specific) |
+| `thinking_budget` | `NULL` | Token budget for the reasoning phase |
+| `disable_tools` | `FALSE` | Disable MCP tool calls — **set to `TRUE` for headless automation** |
+| `enable_vision` | `FALSE` | Enable image understanding |
+| `structured_output_enabled` | `FALSE` | Enable JSON-formatted output |
+
+> **Note:** On some LLM providers (notably Anthropic),
+> `structured_output_enabled` and `reasoning_enabled` are mutually
+> exclusive. The server will reject the request if both are `TRUE`.
+
+## Invoking an Agent
+
+Send a prompt and receive a synchronous LLM completion:
+
+``` r
+
+response <- invoke_agent(
+  bot_user_id = agent$bot_user_id,
+  message     = "What is the current Fed funds rate and how does it affect tech valuations?",
+  auth        = auth
+)
+
+cat(response$message)
+#> - **Fed funds rate**: 4.25–4.50% (unchanged since Dec 2024). Markets
+#>   pricing 2 cuts in H2 2025.
+#> - **Tech impact**: Higher discount rates compress growth stock DCFs;
+#>   mega-cap P/E multiples remain historically elevated at ~30x.
+#> - **Contrarian view**: Real rates are restrictive but earnings growth
+#>   (AI capex cycle) may sustain valuations through 2025.
+```
+
+### Custom System Prompt
+
+Override the agent’s default instructions for a single request:
+
+``` r
+
+response <- invoke_agent(
+  bot_user_id   = agent$bot_user_id,
+  message       = "Summarize the ECB rate decision impact on EUR/USD",
+  system_prompt = "You are a macro FX strategist. Be extremely concise. Max 2 sentences.",
+  auth          = auth
+)
+
+cat(response$message)
+#> ECB cut 25bp to 3.50%; EUR/USD dropped 40 pips to 1.0820 on dovish
+#> forward guidance. Yield differential widening favours USD into Q3.
+```
+
+### Extended Timeout for Reasoning Models
+
+LLM completions with reasoning enabled can take 30–120+ seconds. The
+default `timeout = 120` seconds handles most cases, but increase it for
+complex prompts:
+
+``` r
+
+response <- invoke_agent(
+  bot_user_id = agent$bot_user_id,
+  message     = "Build a simplified DCF model for Boeing with 5-year projections.",
+  timeout     = 300,  # 5 minutes for complex reasoning
+  auth        = auth
+)
+```
+
+## Multi-Turn Conversations
+
+Provide prior conversation context to enable follow-up questions:
+
+``` r
+
+# First turn
+response1 <- invoke_agent(
+  bot_user_id = agent$bot_user_id,
+  message     = "What are the key risks for European banks in 2025?",
+  auth        = auth
+)
+
+# Second turn — provide the prior exchange as context
+response2 <- invoke_agent(
+  bot_user_id = agent$bot_user_id,
+  message     = "Which specific banks have the highest CRE exposure?",
+  context     = list(
+    list(role = "user",      content = "What are the key risks for European banks in 2025?"),
+    list(role = "assistant", content = response1$message)
+  ),
+  auth = auth
+)
+
+cat(response2$message)
+```
+
+## Managing Agents
+
+### Update an agent
+
+Only the provided fields are modified; everything else is preserved:
+
+``` r
+
+update_agent(
+  agent_id     = agent$id,
+  model        = "grok-3-mini",   # Switch to a faster model
+  instructions = "Be brief. Max 1 sentence per point.",
+  auth         = auth
+)
+```
+
+### Delete an agent
+
+This removes the agent configuration. The underlying bot account is
+unaffected:
+
+``` r
+
+delete_agent(agent_id = agent$id, auth = auth)
+```
+
+## Best Practices for Automated Pipelines
+
+When calling
+[`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+from Airflow DAGs, cron jobs, or other headless automation, follow these
+guidelines:
+
+### 1. Disable tools
+
+Agents v2.0 supports MCP (Model Context Protocol) tool calling. Some
+tools require interactive UI approval — a human clicking “Accept” in the
+Mattermost chat interface. In a headless script, this causes the request
+to hang indefinitely.
+
+**Always create pipeline agents with `disable_tools = TRUE`:**
+
+``` r
+
+pipeline_agent <- create_agent(
+  bot_user_id   = bot$user_id,
+  display_name  = "Pipeline Analyst",
+  instructions  = "Summarize financial news in 3 bullet points. Be cynical.",
+  model         = "grok-3",
+  disable_tools = TRUE,
+  auth          = auth
+)
+```
+
+### 2. Set generous timeouts
+
+Reasoning models (the v2.0 default) think before they respond. Budget at
+least 120 seconds for standard prompts and 300+ for complex analytical
+queries:
+
+``` r
+
+response <- invoke_agent(
+  bot_user_id = pipeline_agent$bot_user_id,
+  message     = news_body,
+  timeout     = 180,
+  auth        = auth
+)
+```
+
+### 3. Handle the full response
+
+[`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+returns the **complete parsed JSON response**, not just the message
+text. This future-proofs your code against new fields the plugin may add
+(tool results, token counts, metadata):
+
+``` r
+
+response <- invoke_agent(
+  bot_user_id = pipeline_agent$bot_user_id,
+  message     = "Analyze this earnings report.",
+  auth        = auth
+)
+
+# The text response
+analysis <- response$message
+
+# Post it as a threaded reply in Mattermost
+send_mattermost_message(
+  channel_id = channel_id,
+  message    = analysis,
+  root_id    = parent_post_id,
+  auth       = auth
+)
+```
+
+### 4. Forward-compatible experimental fields
+
+The
+[`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+function accepts `...` for passing experimental or newly-added plugin
+API fields without waiting for a package update:
+
+``` r
+
+# If the plugin adds a 'conversation_id' field in a future version:
+response <- invoke_agent(
+  bot_user_id     = pipeline_agent$bot_user_id,
+  message         = "Continue where we left off.",
+  conversation_id = "conv_abc123",
+  auth            = auth
+)
+```
+
+## Plugin ID Configuration
+
+Different Mattermost versions or custom installations may use different
+plugin identifiers. MattermostR resolves the plugin ID from:
+
+1.  `getOption("MattermostR.agents_plugin_id")` — if set
+2.  Default: `"mattermost-ai-agents"`
+
+To discover the actual plugin ID on your server:
+
+``` r
+
+# List all installed plugins
+plugins <- mattermost_api_request(auth, "/api/v4/plugins", method = "GET")
+
+# Find the agents plugin
+agents_plugins <- Filter(
+  function(p) grepl("agent|ai", p$id, ignore.case = TRUE),
+  plugins$active
+)
+```
+
+## Summary
+
+| Function | Purpose |
+|:---|:---|
+| [`get_agents_plugin_id()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agents_plugin_id.md) | Resolve the plugin identifier |
+| [`list_agents()`](https://greengrassblueocean.github.io/MattermostR/reference/list_agents.md) | Discover all configured agents |
+| [`get_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agent.md) | Get a single agent’s configuration |
+| [`create_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/create_agent.md) | Create an agent with v2.0 schema |
+| [`update_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/update_agent.md) | Partially update an agent |
+| [`delete_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_agent.md) | Remove an agent |
+| [`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md) | Send a prompt and get an LLM completion |

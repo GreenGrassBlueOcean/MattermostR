@@ -3,6 +3,8 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/AGENTS.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/LICENSE-text.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/LICENSE.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/articles/ai-agents.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/articles/index.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/authors.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/index.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/news/index.html</loc></url>
@@ -14,10 +16,12 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_auth.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_status.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/clear_mattermost_credentials.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/create_agent.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/create_bot.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/create_channel.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/create_command.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/create_direct_channel.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/delete_agent.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/delete_channel.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/delete_command.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/delete_old_messages.html</loc></url>
@@ -25,6 +29,8 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/disable_bot.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/enable_bot.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/execute_command.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_agent.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_agents_plugin_id.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_all_teams.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_all_users.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_bot.html</loc></url>
@@ -43,6 +49,8 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_user_info.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_user_status.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/index.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/list_agents.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/list_commands.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/pin_post.html</loc></url>
@@ -55,6 +63,7 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/send_webhook_message.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/set_user_status.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/unpin_post.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/update_agent.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/update_bot.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/update_command.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/update_post.html</loc></url>

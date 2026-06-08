@@ -1,5 +1,39 @@
 # Changelog
 
+## MattermostR 0.2.0.9001
+
+### New features
+
+#### AI Agents (Plugin)
+
+- [`list_agents()`](https://greengrassblueocean.github.io/MattermostR/reference/list_agents.md)
+  — discover all AI agents configured on the server.
+- [`get_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agent.md)
+  — retrieve a single agent’s configuration.
+- [`create_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/create_agent.md)
+  — create an AI agent with full v2.0 schema support: model, reasoning
+  controls, tool policy, vision, and structured output.
+- [`update_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/update_agent.md)
+  — partially update an agent’s configuration.
+- [`delete_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_agent.md)
+  — remove an agent (bot account is unaffected).
+- [`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+  — send a prompt to an AI agent and receive a synchronous LLM
+  completion. Supports system prompts, multi-turn context, extended
+  timeouts for reasoning models, and forward-compatible `...` for
+  experimental fields.
+- [`get_agents_plugin_id()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agents_plugin_id.md)
+  — resolve the plugin ID (configurable via
+  `options(MattermostR.agents_plugin_id)`).
+
+### Improvements
+
+- [`mattermost_api_request()`](https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.md)
+  gains an optional `timeout` parameter for long-running requests
+  (e.g. LLM completions that routinely take 30–120+ seconds).
+
+------------------------------------------------------------------------
+
 ## MattermostR 0.2.0
 
 ### New functions

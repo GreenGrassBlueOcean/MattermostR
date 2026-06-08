@@ -8,6 +8,7 @@ commands, and more.
 ## Installation
 
 ``` r
+
 # Install from GitHub
 devtools::install_github("GreenGrassBlueOcean/MattermostR")
 ```
@@ -19,6 +20,7 @@ Credentials are resolved from environment variables first, then R
 options.
 
 ``` r
+
 # Token-based (recommended)
 auth <- authenticate_mattermost(
   base_url = "https://your-mattermost.example.com",
@@ -35,6 +37,7 @@ auth <- authenticate_mattermost(
 ### Basic message
 
 ``` r
+
 send_mattermost_message(
   channel_id = "your-channel-id",
   message    = "Hello, Mattermost!",
@@ -45,6 +48,7 @@ send_mattermost_message(
 ### Message with priority
 
 ``` r
+
 send_mattermost_message(
   channel_id = "your-channel-id",
   message    = "Urgent update!",
@@ -56,6 +60,7 @@ send_mattermost_message(
 ### Reply in a thread
 
 ``` r
+
 send_mattermost_message(
   channel_id = "your-channel-id",
   message    = "This is a thread reply.",
@@ -67,6 +72,7 @@ send_mattermost_message(
 ### Attach a file or plot
 
 ``` r
+
 library(ggplot2)
 
 p <- ggplot(mtcars, aes(wt, mpg)) + geom_point()
@@ -82,6 +88,7 @@ send_mattermost_message(
 ### Incoming webhooks (no auth required)
 
 ``` r
+
 send_webhook_message(
   webhook_url = "https://your-mattermost.example.com/hooks/your-hook-id",
   message     = "Automated notification from R."
@@ -91,6 +98,7 @@ send_webhook_message(
 ## Managing Posts
 
 ``` r
+
 # Edit an existing post
 update_post(post_id = "post-id", message = "Corrected text.", auth = auth)
 
@@ -108,6 +116,7 @@ delete_old_messages(
 ## Reactions & Pins
 
 ``` r
+
 # Emoji reactions
 add_reaction(post_id = "post-id", emoji_name = "thumbsup", auth = auth)
 get_reactions(post_id = "post-id", auth = auth)
@@ -121,6 +130,7 @@ unpin_post(post_id = "post-id", auth = auth)
 ## Searching and Retrieving Posts
 
 ``` r
+
 # Retrieve posts from a channel (paginated)
 posts <- get_channel_posts(channel_id = "your-channel-id", auth = auth)
 
@@ -137,6 +147,7 @@ results <- search_posts(
 ## Managing Channels
 
 ``` r
+
 # List channels in a team
 channels <- get_team_channels(team_id = "your-team-id", auth = auth)
 
@@ -167,6 +178,7 @@ remove_channel_member(channel_id = "channel-id", user_id = "user-id", auth = aut
 ## Teams and Users
 
 ``` r
+
 # Teams
 teams   <- get_all_teams(auth = auth)
 team    <- get_team(team_id = "your-team-id", auth = auth)
@@ -184,6 +196,7 @@ set_user_status(user_id = "user-id", status = "away", auth = auth)
 ## Files
 
 ``` r
+
 # Download a file
 get_mattermost_file(file_id = "file-id", dest_path = "local/file.png", auth = auth)
 ```
@@ -191,6 +204,7 @@ get_mattermost_file(file_id = "file-id", dest_path = "local/file.png", auth = au
 ## Bots
 
 ``` r
+
 bot <- create_bot(username = "mybot", display_name = "My Bot", auth = auth)
 get_bots(auth = auth)
 disable_bot(bot_user_id = bot$user_id, auth = auth)
@@ -200,6 +214,7 @@ enable_bot(bot_user_id = bot$user_id, auth = auth)
 ## Slash Commands
 
 ``` r
+
 cmd <- create_command(
   team_id      = "your-team-id",
   trigger      = "remind",
@@ -212,6 +227,35 @@ list_commands(team_id = "your-team-id", auth = auth)
 delete_command(command_id = cmd$id, auth = auth)
 ```
 
+## AI Agents (v2.0 Plugin API)
+
+Discover, configure, and invoke AI agents (Grok, Gemini, Perplexity,
+etc.) integrated with Mattermost via the Agents v2.0 plugin:
+
+``` r
+
+# 1. Discover available agents
+agents <- list_agents(auth = auth)
+
+# 2. Invoke an agent synchronously
+response <- invoke_agent(
+  bot_user_id = "bot-user-id-for-agent",
+  message     = "What was the ECB's interest rate decision?",
+  auth        = auth
+)
+cat(response$message)
+
+# 3. Create a new agent bound to a bot account
+agent <- create_agent(
+  bot_user_id       = "bot-user-id",
+  display_name      = "Quant Expert",
+  instructions      = "You are a quantitative finance advisor.",
+  model             = "grok-3",
+  reasoning_enabled = TRUE, # Enable reasoning (v2.0 plugin feature)
+  auth              = auth
+)
+```
+
 ## Error Handling
 
 By default, HTTP errors raise a `mattermost_error` condition (stops
@@ -219,6 +263,7 @@ execution). Switch to the legacy silent mode if you prefer `NULL`
 returns:
 
 ``` r
+
 options(MattermostR.on_error = "message")
 ```
 
@@ -376,6 +421,25 @@ Register and manage slash commands.
 - [`regen_command_token()`](https://greengrassblueocean.github.io/MattermostR/reference/regen_command_token.md)
   : Regenerate a command token
 
+## AI Agents (Plugin)
+
+Interact with the Mattermost Agents v2.0 plugin for AI completions.
+
+- [`list_agents()`](https://greengrassblueocean.github.io/MattermostR/reference/list_agents.md)
+  : List AI agents
+- [`get_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agent.md)
+  : Get a single AI agent
+- [`create_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/create_agent.md)
+  : Create an AI agent
+- [`update_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/update_agent.md)
+  : Update an AI agent
+- [`delete_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_agent.md)
+  : Delete an AI agent
+- [`invoke_agent()`](https://greengrassblueocean.github.io/MattermostR/reference/invoke_agent.md)
+  : Invoke an AI agent
+- [`get_agents_plugin_id()`](https://greengrassblueocean.github.io/MattermostR/reference/get_agents_plugin_id.md)
+  : Get the Agents Plugin ID
+
 ## Low-level / Developer
 
 Direct API access and server utilities.
@@ -385,3 +449,9 @@ Direct API access and server utilities.
 - [`check_mattermost_status()`](https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_status.md)
   : Check if the Mattermost server is online
 
+# Articles
+
+### Vignettes
+
+- [Getting Started with AI
+  Agents](https://greengrassblueocean.github.io/MattermostR/articles/ai-agents.md):

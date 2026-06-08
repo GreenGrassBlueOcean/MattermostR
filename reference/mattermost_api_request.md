@@ -14,6 +14,7 @@ mattermost_api_request(
   method = "GET",
   body = NULL,
   multipart = FALSE,
+  timeout = NULL,
   verbose = FALSE
 )
 ```
@@ -43,6 +44,14 @@ mattermost_api_request(
 
   (Logical) Set to \`TRUE\` if the request includes multipart data
   (e.g., file upload).
+
+- timeout:
+
+  (Numeric or NULL) Optional request timeout in seconds. When `NULL`
+  (default), no explicit timeout is set and the system default applies.
+  Set to a positive number for long-running requests such as LLM
+  completions via the Agents plugin, where response times of 30–120
+  seconds are common.
 
 - verbose:
 

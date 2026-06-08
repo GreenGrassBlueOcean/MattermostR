@@ -30,6 +30,7 @@ A named list with the deletion status as returned by the Mattermost API.
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
  delete_post(post_id = "fake_id")
 } # }
