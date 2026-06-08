@@ -31,7 +31,7 @@ It covers messaging, file management, channel and team administration, reactions
 
 ``` r
 # Install from GitHub
-devtools::install_github("GreenGrassBlueOcean/MattermostR")
+pak::pak("GreenGrassBlueOcean/MattermostR")
 ```
 
 ## Authentication
