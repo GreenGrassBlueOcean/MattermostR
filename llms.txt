@@ -10,7 +10,7 @@ commands, and more.
 ``` r
 
 # Install from GitHub
-devtools::install_github("GreenGrassBlueOcean/MattermostR")
+pak::pak("GreenGrassBlueOcean/MattermostR")
 ```
 
 ## Authentication
