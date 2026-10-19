@@ -9,6 +9,7 @@ get_channel_posts(
   page = 0,
   per_page = 60,
   since = NULL,
+  include_metadata = FALSE,
   verbose = FALSE,
   auth = get_default_auth()
 )
@@ -24,6 +25,9 @@ get_channel_posts(
 When provided, returns all posts created or modified after this time, up to a
 server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page`.}
 
+\item{include_metadata}{Boolean. If `TRUE`, appends `root_id`, `override_username`,
+and `from_webhook` columns extracted from post metadata. Default is `FALSE`.}
+
 \item{verbose}{Boolean. If `TRUE`, the function will print request/response details for more information.}
 
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
@@ -31,7 +35,8 @@ server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page
 \value{
 A data frame of posts from the channel with columns `id`, `create_at`,
   `update_at`, `edit_at`, `delete_at`, `is_pinned`, `user_id`, `channel_id`,
-  `message`, and `type`. Returns an empty data frame if no posts are found.
+  `message`, and `type` (plus `root_id`, `override_username`, and `from_webhook`
+  when `include_metadata = TRUE`). Returns an empty data frame if no posts are found.
 
   A warning is issued when the number of returned posts equals `per_page`,
   indicating that additional pages may be available.

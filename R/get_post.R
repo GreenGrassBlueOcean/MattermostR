@@ -1,7 +1,7 @@
 #' Retrieve a Single Mattermost Post by ID
 #'
 #' Fetches the full post object for a specific Mattermost `post_id` via
-#' `GET /api/v4/posts/{post_id}`.
+#' `GET /api/v4/posts/<post_id>`.
 #'
 #' @param post_id Character string. The ID of the post to retrieve.
 #' @param verbose Logical. If `TRUE`, prints request and response details.
@@ -32,7 +32,7 @@ get_post <- function(post_id = NULL, verbose = FALSE, auth = get_default_auth())
 #' Retrieve a Mattermost Post Thread by Post ID
 #'
 #' Fetches the root post and all replies in the thread containing `post_id`
-#' via `GET /api/v4/posts/{post_id}/thread`, returning a chronologically
+#' via `GET /api/v4/posts/<post_id>/thread`, returning a chronologically
 #' ordered data frame.
 #'
 #' @param post_id Character string. The ID of any post in the thread (typically

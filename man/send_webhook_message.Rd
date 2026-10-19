@@ -13,7 +13,9 @@ send_webhook_message(
   icon_emoji = NULL,
   attachments = NULL,
   props = NULL,
-  priority = NULL
+  priority = NULL,
+  timeout = 10,
+  max_tries = 3
 )
 }
 \arguments{
@@ -49,6 +51,11 @@ right-hand side panel.}
 
 \item{priority}{Optional. A list specifying message priority (e.g.
 \code{list(priority = "important")}).}
+
+\item{timeout}{Numeric. Request timeout in seconds (default \code{10}).}
+
+\item{max_tries}{Integer. Maximum number of retry attempts on transient
+HTTP failures (default \code{3}).}
 }
 \value{
 The \code{httr2} response object, returned invisibly. A successful
@@ -65,7 +72,7 @@ Incoming webhooks must be enabled on the Mattermost server
 The webhook URL is created via
 \strong{Product menu > Integrations > Incoming Webhook} in Mattermost.
 
-The request is retried up to 3 times on transient failures.
+The request is retried up to \code{max_tries} times on transient failures.
 }
 \examples{
 \dontrun{

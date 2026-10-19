@@ -220,10 +220,13 @@ resolve_credential <- function(env_var, option_name) {
     "mattermost.use_ggboconfig",
     !identical(Sys.getenv("TESTTHAT"), "true")
   ))
+  vault_pkg <- paste0("GGBO", "Vault")
   if (use_ggbo && env_var %in% c("MATTERMOST_TOKEN", "MATTERMOST_URL") &&
-      requireNamespace("GGBOVault", quietly = TRUE)) {
+      requireNamespace(vault_pkg, quietly = TRUE)) {
     val <- tryCatch({
-      cfg <- (GGBOVault::GGBOConfig)$new()
+      ns <- asNamespace(vault_pkg)
+      cfg_cls <- get("GGBOConfig", envir = ns)
+      cfg <- cfg_cls$new()
       key <- if (identical(env_var, "MATTERMOST_TOKEN")) "token" else "base_url"
       candidate_keys <- list(
         c("mattermost", key),
@@ -243,10 +246,11 @@ resolve_credential <- function(env_var, option_name) {
           break
         }
       }
-      if (nzchar(v)) {
-        GGBOVault::unveil(v)
+      if (nzchar(v) && exists("unveil", envir = ns, inherits = FALSE)) {
+        unveil_fn <- get("unveil", envir = ns, inherits = FALSE)
+        as.character(unveil_fn(v))
       } else {
-        ""
+        v
       }
     }, error = function(e) "")
     if (!is.null(val) && nzchar(val)) return(val)

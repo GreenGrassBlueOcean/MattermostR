@@ -4,13 +4,25 @@
 \alias{delete_old_messages}
 \title{Delete Messages Older Than X Days in a Mattermost Channel}
 \usage{
-delete_old_messages(channel_id, days, auth = get_default_auth())
+delete_old_messages(
+  channel_id,
+  days,
+  dry_run = FALSE,
+  pattern = NULL,
+  auth = get_default_auth()
+)
 }
 \arguments{
 \item{channel_id}{Character string. The ID of the Mattermost channel from which
 messages should be deleted.}
 
 \item{days}{Numeric. The age in days of the messages to be deleted.}
+
+\item{dry_run}{Logical. When `TRUE`, returns the candidate messages with
+`delete_status = "DRY_RUN"` without calling `delete_post()`. Default `FALSE`.}
+
+\item{pattern}{Optional character regex pattern. When provided, only messages
+whose `message` text matches `pattern` are selected for deletion.}
 
 \item{auth}{The authentication object created by `authenticate_mattermost()`.}
 }
@@ -29,7 +41,6 @@ specified number of days.
   teams <- get_all_teams()
   team_channels <- get_team_channels(team_id = teams$id[1])
   channel_id <- get_channel_id_lookup(team_channels, name = "off-topic")
-  posts <- delete_old_messages(channel_id, 0)
-
+  posts <- delete_old_messages(channel_id, 7, dry_run = TRUE)
 }
 }

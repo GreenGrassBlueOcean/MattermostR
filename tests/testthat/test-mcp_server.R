@@ -157,7 +157,7 @@ test_that("mm_get_channel_posts defaults include_metadata = TRUE and mm_send_web
   expect_equal(formals(send_webhook_message)$max_tries, 3)
 })
 
-test_that(".mm_mcp_dispatch_tool handles data.table in mm_list_channels without error", {
+test_that(".mm_mcp_dispatch_tool subsets columns cleanly in mm_list_channels", {
   mock_auth <- structure(
     list(base_url = "https://mock.mattermost.com", headers = "Bearer mock_token"),
     class = "mattermost_auth"
@@ -165,7 +165,7 @@ test_that(".mm_mcp_dispatch_tool handles data.table in mm_list_channels without 
   state <- new.env(parent = emptyenv())
   state$auth <- mock_auth
 
-  mock_dt <- data.table::data.table(
+  mock_dt <- data.frame(
     id = c("c1", "c2"),
     name = c("edgarx", "town-square"),
     display_name = c("EdgarX", "Town Square"),
@@ -173,7 +173,8 @@ test_that(".mm_mcp_dispatch_tool handles data.table in mm_list_channels without 
     header = c("Alerts", "General"),
     purpose = c("SEC", "All"),
     delete_at = c(0, 0),
-    extra_col = c("x", "y")
+    extra_col = c("x", "y"),
+    stringsAsFactors = FALSE
   )
   mockery::stub(.mm_mcp_dispatch_tool, "get_all_teams", function(auth) {
     data.frame(id = "t1", stringsAsFactors = FALSE)

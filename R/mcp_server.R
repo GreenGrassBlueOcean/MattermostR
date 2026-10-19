@@ -266,11 +266,7 @@ run_mcp_stdio <- function(con = NULL, test_mode = FALSE, auth = NULL,
         }
         keep_cols <- intersect(c("id", "name", "display_name", "type", "header", "purpose"), names(ch))
         if (length(keep_cols) > 0L) {
-          ch <- if (inherits(ch, "data.table")) {
-            ch[, .SD, .SDcols = keep_cols]
-          } else {
-            ch[, keep_cols, drop = FALSE]
-          }
+          ch <- as.data.frame(ch)[, keep_cols, drop = FALSE]
         }
         ch
       },
