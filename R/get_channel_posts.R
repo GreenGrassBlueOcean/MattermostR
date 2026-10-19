@@ -12,12 +12,15 @@
 #' @param since (Optional) A POSIXct, Date, or numeric (Unix time in milliseconds) value.
 #'   When provided, returns all posts created or modified after this time, up to a
 #'   server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page`.
+#' @param include_metadata Boolean. If `TRUE`, appends `root_id`, `override_username`,
+#'   and `from_webhook` columns extracted from post metadata. Default is `FALSE`.
 #' @param verbose Boolean. If `TRUE`, the function will print request/response details for more information.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
 #'
 #' @return A data frame of posts from the channel with columns `id`, `create_at`,
 #'   `update_at`, `edit_at`, `delete_at`, `is_pinned`, `user_id`, `channel_id`,
-#'   `message`, and `type`. Returns an empty data frame if no posts are found.
+#'   `message`, and `type` (plus `root_id`, `override_username`, and `from_webhook`
+#'   when `include_metadata = TRUE`). Returns an empty data frame if no posts are found.
 #'
 #'   A warning is issued when the number of returned posts equals `per_page`,
 #'   indicating that additional pages may be available.
@@ -41,7 +44,8 @@
 #'   posts <- get_channel_posts(channel_id, since = as.POSIXct("2024-01-01", tz = "UTC"))
 #' }
 get_channel_posts <- function(channel_id, page = 0, per_page = 60, since = NULL,
-                              verbose = FALSE, auth = get_default_auth()) {
+                              include_metadata = FALSE, verbose = FALSE,
+                              auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")
@@ -89,7 +93,10 @@ get_channel_posts <- function(channel_id, page = 0, per_page = 60, since = NULL,
     verbose = verbose
   )
 
-  result_df <- convert_mattermost_posts_to_dataframe(response)
+  result_df <- convert_mattermost_posts_to_dataframe(
+    response,
+    include_extended = isTRUE(include_metadata)
+  )
 
   # Warn when pagination limit is hit (only for page/per_page mode)
   if (is.null(since) && nrow(result_df) == per_page) {
@@ -100,6 +107,36 @@ get_channel_posts <- function(channel_id, page = 0, per_page = 60, since = NULL,
   }
 
   return(result_df)
+}
+
+#' Get Channel Posts with Extended Webhook and Thread Metadata
+#'
+#' Convenience wrapper around \code{\link{get_channel_posts}} that defaults
+#' \code{include_metadata = TRUE} (extracting \code{root_id},
+#' \code{override_username}, and \code{from_webhook}) and preserves
+#' Mattermost's reverse-chronological post ordering.
+#'
+#' @inheritParams get_channel_posts
+#' @return A data frame of posts ordered newest-first, including extended
+#'   metadata columns (\code{root_id}, \code{override_username},
+#'   \code{from_webhook}) when \code{include_metadata = TRUE}.
+#' @export
+#' @examples
+#' \dontrun{
+#'   posts <- mm_get_channel_posts("channel_id_here", per_page = 60)
+#' }
+mm_get_channel_posts <- function(channel_id, page = 0, per_page = 60, since = NULL,
+                                 include_metadata = TRUE, verbose = FALSE,
+                                 auth = get_default_auth()) {
+  get_channel_posts(
+    channel_id       = channel_id,
+    page             = page,
+    per_page         = per_page,
+    since            = since,
+    include_metadata = include_metadata,
+    verbose          = verbose,
+    auth             = auth
+  )
 }
 
 #' Convert a since value to Unix timestamp in milliseconds
@@ -132,29 +169,60 @@ convert_since_to_ms <- function(since) {
 #' This function transforms a nested list of posts retrieved from Mattermost
 #' into a data frame. Each post's attributes are converted into corresponding
 #' columns in the data frame, including timestamp fields which are formatted
-#' as POSIXct.
+#' as POSIXct. When `nested_list$order` is present, rows are ordered according
+#' to `nested_list$order`.
 #'
 #' @param nested_list A nested list containing posts from Mattermost,
 #'                    structured as returned by the Mattermost API.
+#' @param include_extended Logical. When `TRUE`, includes `root_id`,
+#'   `override_username`, and `from_webhook` columns.
 #'
 #' @return A data frame with each post represented as a row, and attributes
 #'         of the posts as columns.
 #' @noRd
-convert_mattermost_posts_to_dataframe <- function(nested_list) {
+convert_mattermost_posts_to_dataframe <- function(nested_list, include_extended = FALSE) {
   # Extract the posts list
   posts <- nested_list$posts
+  if (is.null(posts) || length(posts) == 0L) {
+    return(data.frame())
+  }
+
+  # Respect Mattermost's `order` array when present (newest-first IDs)
+  ord <- nested_list$order
+  if (!is.null(ord) && length(ord) > 0L) {
+    ord_ids <- as.character(unlist(ord, use.names = FALSE))
+    by_id <- list()
+    for (p in posts) {
+      if (!is.null(p$id)) by_id[[as.character(p$id)]] <- p
+    }
+    ordered_posts <- list()
+    seen <- character(0)
+    for (pid in ord_ids) {
+      if (!is.null(by_id[[pid]])) {
+        ordered_posts[[length(ordered_posts) + 1L]] <- by_id[[pid]]
+        seen <- c(seen, pid)
+      }
+    }
+    for (p in posts) {
+      pid <- as.character(p$id)
+      if (!pid %in% seen) {
+        ordered_posts[[length(ordered_posts) + 1L]] <- p
+      }
+    }
+    posts <- ordered_posts
+  }
 
   # Initialize an empty list to store the rows
   rows_list <- list()
 
   # Loop through each post and extract relevant fields
   for (post in posts) {
-    rows_list[[length(rows_list) + 1]] <- data.frame(
+    row_df <- data.frame(
       id = post$id,
-      create_at = if(post$create_at != 0) { as.POSIXct(post$create_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
-      update_at = if(post$update_at != 0) { as.POSIXct(post$update_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
-      edit_at = if(post$edit_at != 0) { as.POSIXct(post$edit_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
-      delete_at = if(post$delete_at != 0) { as.POSIXct(post$delete_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
+      create_at = if (post$create_at != 0) { as.POSIXct(post$create_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
+      update_at = if (post$update_at != 0) { as.POSIXct(post$update_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
+      edit_at = if (post$edit_at != 0) { as.POSIXct(post$edit_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
+      delete_at = if (post$delete_at != 0) { as.POSIXct(post$delete_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
       is_pinned = post$is_pinned,
       user_id = post$user_id,
       channel_id = post$channel_id,
@@ -162,11 +230,23 @@ convert_mattermost_posts_to_dataframe <- function(nested_list) {
       type = post$type,
       stringsAsFactors = FALSE
     )
+    if (isTRUE(include_extended)) {
+      row_df$root_id <- if (!is.null(post$root_id)) as.character(post$root_id) else ""
+      row_df$override_username <- if (!is.null(post$props) && !is.null(post$props$override_username)) {
+        as.character(post$props$override_username)
+      } else {
+        ""
+      }
+      row_df$from_webhook <- isTRUE(post$props$from_webhook) ||
+        identical(as.character(post$props$from_webhook), "true")
+    }
+    rows_list[[length(rows_list) + 1L]] <- row_df
   }
 
   # Combine all rows into a single data.frame
-  if(length(rows_list) > 0 ){
+  if (length(rows_list) > 0L) {
     posts_df <- do.call(rbind, rows_list)
+    rownames(posts_df) <- NULL
   } else {
     posts_df <- data.frame()
   }

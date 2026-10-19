@@ -8,8 +8,11 @@
 #' @param channel_id Character string. The ID of the Mattermost channel from which
 #'   messages should be deleted.
 #' @param days Numeric. The age in days of the messages to be deleted.
+#' @param dry_run Logical. When `TRUE`, returns the candidate messages with
+#'   `delete_status = "DRY_RUN"` without calling `delete_post()`. Default `FALSE`.
+#' @param pattern Optional character regex pattern. When provided, only messages
+#'   whose `message` text matches `pattern` are selected for deletion.
 #' @param auth The authentication object created by `authenticate_mattermost()`.
-#'
 #'
 #' @return A data frame with columns `message_id` and `delete_status`, or an
 #'   empty data frame if no messages were deleted.
@@ -19,10 +22,10 @@
 #'   teams <- get_all_teams()
 #'   team_channels <- get_team_channels(team_id = teams$id[1])
 #'   channel_id <- get_channel_id_lookup(team_channels, name = "off-topic")
-#'   posts <- delete_old_messages(channel_id, 0)
-#'
+#'   posts <- delete_old_messages(channel_id, 7, dry_run = TRUE)
 #' }
-delete_old_messages <- function(channel_id, days, auth = get_default_auth()) {
+delete_old_messages <- function(channel_id, days, dry_run = FALSE,
+                                pattern = NULL, auth = get_default_auth()) {
 
   # Check required input for completeness
   check_not_null(channel_id, "channel_id")
@@ -33,9 +36,20 @@ delete_old_messages <- function(channel_id, days, auth = get_default_auth()) {
 
   # Fetch all posts by auto-paginating (200 per page, the API maximum)
   messages <- get_all_channel_posts(channel_id = channel_id, auth = auth)
+  if (!is.data.frame(messages) || nrow(messages) == 0L) {
+    message("No messages older than ", days, " days found in channel ", channel_id)
+    return(data.frame())
+  }
 
   # Filter to messages older than the cutoff
   messages_to_delete <- messages[as.numeric(messages$create_at) < as.numeric(cutoff_time), , drop = FALSE]
+
+  # Optional regex pattern filter on message text
+  if (!is.null(pattern) && nzchar(pattern) && nrow(messages_to_delete) > 0L &&
+      "message" %in% names(messages_to_delete)) {
+    keep <- grepl(pattern, as.character(messages_to_delete$message), perl = TRUE)
+    messages_to_delete <- messages_to_delete[keep, , drop = FALSE]
+  }
 
   # Check if there are messages to delete
   if (nrow(messages_to_delete) == 0) {
@@ -43,10 +57,23 @@ delete_old_messages <- function(channel_id, days, auth = get_default_auth()) {
     return(data.frame())
   }
 
-  # Delete each old message
+  if (isTRUE(dry_run)) {
+    return(data.frame(
+      message_id = messages_to_delete$id,
+      delete_status = rep("DRY_RUN", nrow(messages_to_delete)),
+      stringsAsFactors = FALSE
+    ))
+  }
+
+  # Delete each old message (forward auth when delete_post accepts it)
   deleted_message_status <- character(length = length(messages_to_delete$id))
-  for ( i in 1:length(messages_to_delete$id)) {
-    msg <- delete_post(post_id = messages_to_delete$id[i])
+  has_auth_arg <- "auth" %in% names(formals(delete_post))
+  for (i in seq_along(messages_to_delete$id)) {
+    msg <- if (has_auth_arg) {
+      delete_post(post_id = messages_to_delete$id[i], auth = auth)
+    } else {
+      delete_post(post_id = messages_to_delete$id[i])
+    }
     deleted_message_status[i] <- msg[[1]]
   }
 

@@ -216,6 +216,42 @@ resolve_credential <- function(env_var, option_name) {
   val <- getOption(option_name, NULL)
   if (!is.null(val) && nzchar(val)) return(val)
 
+  use_ggbo <- isTRUE(getOption(
+    "mattermost.use_ggboconfig",
+    !identical(Sys.getenv("TESTTHAT"), "true")
+  ))
+  if (use_ggbo && env_var %in% c("MATTERMOST_TOKEN", "MATTERMOST_URL") &&
+      requireNamespace("GGBOVault", quietly = TRUE)) {
+    val <- tryCatch({
+      cfg <- (GGBOVault::GGBOConfig)$new()
+      key <- if (identical(env_var, "MATTERMOST_TOKEN")) "token" else "base_url"
+      candidate_keys <- list(
+        c("mattermost", key),
+        c("messaging", "mattermost", key)
+      )
+      if (identical(key, "base_url")) {
+        candidate_keys <- c(candidate_keys, list(
+          c("mattermost", "url"),
+          c("messaging", "mattermost", "url")
+        ))
+      }
+      v <- ""
+      for (k in candidate_keys) {
+        res <- tryCatch(cfg$get(k, default = ""), error = function(e) "")
+        if (!is.null(res) && length(res) == 1L && nzchar(as.character(res)[1L])) {
+          v <- as.character(res)[1L]
+          break
+        }
+      }
+      if (nzchar(v)) {
+        GGBOVault::unveil(v)
+      } else {
+        ""
+      }
+    }, error = function(e) "")
+    if (!is.null(val) && nzchar(val)) return(val)
+  }
+
   NULL
 }
 

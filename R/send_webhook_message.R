@@ -28,6 +28,9 @@
 #'   right-hand side panel.
 #' @param priority Optional. A list specifying message priority (e.g.
 #'   \code{list(priority = "important")}).
+#' @param timeout Numeric. Request timeout in seconds (default \code{10}).
+#' @param max_tries Integer. Maximum number of retry attempts on transient
+#'   HTTP failures (default \code{3}).
 #'
 #' @return The \code{httr2} response object, returned invisibly. A successful
 #'   request returns HTTP 200 with body \code{"ok"}.
@@ -38,7 +41,7 @@
 #' The webhook URL is created via
 #' \strong{Product menu > Integrations > Incoming Webhook} in Mattermost.
 #'
-#' The request is retried up to 3 times on transient failures.
+#' The request is retried up to \code{max_tries} times on transient failures.
 #'
 #' @export
 #' @examples
@@ -80,7 +83,8 @@
 send_webhook_message <- function(webhook_url, text = NULL, channel = NULL,
                                  username = NULL, icon_url = NULL,
                                  icon_emoji = NULL, attachments = NULL,
-                                 props = NULL, priority = NULL) {
+                                 props = NULL, priority = NULL,
+                                 timeout = 10, max_tries = 3) {
 
   # Validate required input
 
@@ -101,10 +105,16 @@ send_webhook_message <- function(webhook_url, text = NULL, channel = NULL,
   if (!is.null(props))       body$props       <- props
   if (!is.null(priority))    body$priority    <- priority
 
-  resp <- httr2::request(webhook_url) |>
+  req <- httr2::request(webhook_url) |>
     httr2::req_body_json(body) |>
-    httr2::req_method("POST") |>
-    httr2::req_retry(max_tries = 3) |>
+    httr2::req_method("POST")
+  if (is.numeric(timeout) && length(timeout) == 1L && is.finite(timeout) && timeout > 0) {
+    req <- httr2::req_timeout(req, timeout)
+  }
+  if (is.numeric(max_tries) && length(max_tries) == 1L && is.finite(max_tries) && max_tries >= 1) {
+    req <- httr2::req_retry(req, max_tries = as.integer(max_tries))
+  }
+  resp <- req |>
     httr2::req_error(is_error = function(resp) FALSE) |>
     httr2::req_perform()
 
@@ -116,3 +126,21 @@ send_webhook_message <- function(webhook_url, text = NULL, channel = NULL,
 
   invisible(resp)
 }
+
+#' Send a Message via a Mattermost Incoming Webhook (Alias)
+#'
+#' Alias for \code{\link{send_webhook_message}} providing a consistent
+#' \code{mm_*} prefix alongside \code{\link{mm_get_channel_posts}}.
+#'
+#' @inheritParams send_webhook_message
+#' @return The \code{httr2} response object, returned invisibly.
+#' @export
+#' @examples
+#' \dontrun{
+#' mm_send_webhook(
+#'   webhook_url = "https://mattermost.example.com/hooks/xxx-generatedkey-xxx",
+#'   text = "Hello from MattermostR!"
+#' )
+#' }
+mm_send_webhook <- send_webhook_message
+
