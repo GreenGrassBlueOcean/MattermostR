@@ -8,7 +8,13 @@ older than the specified number of days.
 ## Usage
 
 ``` r
-delete_old_messages(channel_id, days, auth = get_default_auth())
+delete_old_messages(
+  channel_id,
+  days,
+  dry_run = FALSE,
+  pattern = NULL,
+  auth = get_default_auth()
+)
 ```
 
 ## Arguments
@@ -21,6 +27,17 @@ delete_old_messages(channel_id, days, auth = get_default_auth())
 - days:
 
   Numeric. The age in days of the messages to be deleted.
+
+- dry_run:
+
+  Logical. When \`TRUE\`, returns the candidate messages with
+  \`delete_status = "DRY_RUN"\` without calling \`delete_post()\`.
+  Default \`FALSE\`.
+
+- pattern:
+
+  Optional character regex pattern. When provided, only messages whose
+  \`message\` text matches \`pattern\` are selected for deletion.
 
 - auth:
 
@@ -38,7 +55,6 @@ if (FALSE) { # \dontrun{
   teams <- get_all_teams()
   team_channels <- get_team_channels(team_id = teams$id[1])
   channel_id <- get_channel_id_lookup(team_channels, name = "off-topic")
-  posts <- delete_old_messages(channel_id, 0)
-
+  posts <- delete_old_messages(channel_id, 7, dry_run = TRUE)
 } # }
 ```

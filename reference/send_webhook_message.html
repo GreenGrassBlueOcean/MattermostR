@@ -54,7 +54,9 @@ is needed. The webhook URL itself acts as the credential.</p>
 <span>  icon_emoji <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  attachments <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  props <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  priority <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  priority <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  timeout <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  max_tries <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -112,6 +114,15 @@ right-hand side panel.</p></dd>
 <dd><p>Optional. A list specifying message priority (e.g.
 <code>list(priority = "important")</code>).</p></dd>
 
+
+<dt id="arg-timeout">timeout<a class="anchor" aria-label="anchor" href="#arg-timeout"></a></dt>
+<dd><p>Numeric. Request timeout in seconds (default <code>10</code>).</p></dd>
+
+
+<dt id="arg-max-tries">max_tries<a class="anchor" aria-label="anchor" href="#arg-max-tries"></a></dt>
+<dd><p>Integer. Maximum number of retry attempts on transient
+HTTP failures (default <code>3</code>).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -124,7 +135,7 @@ right-hand side panel.</p></dd>
 (<strong>System Console &gt; Integrations &gt; Integration Management</strong>).
 The webhook URL is created via
 <strong>Product menu &gt; Integrations &gt; Incoming Webhook</strong> in Mattermost.</p>
-<p>The request is retried up to 3 times on transient failures.</p>
+<p>The request is retried up to <code>max_tries</code> times on transient failures.</p>
     </div>
 
     <div class="section level2">

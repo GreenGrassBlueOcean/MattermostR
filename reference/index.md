@@ -21,6 +21,8 @@ Send, edit, and delete messages. Includes webhook and thread support.
   : Send a Message to a Mattermost Channel with Optional Attachments
 - [`send_webhook_message()`](https://greengrassblueocean.github.io/MattermostR/reference/send_webhook_message.md)
   : Send a Message via a Mattermost Incoming Webhook
+- [`mm_send_webhook()`](https://greengrassblueocean.github.io/MattermostR/reference/mm_send_webhook.md)
+  : Send a Message via a Mattermost Incoming Webhook (Alias)
 - [`update_post()`](https://greengrassblueocean.github.io/MattermostR/reference/update_post.md)
   : Update (Patch) an Existing Mattermost Post
 - [`delete_post()`](https://greengrassblueocean.github.io/MattermostR/reference/delete_post.md)
@@ -34,6 +36,12 @@ Retrieve and search posts in channels.
 
 - [`get_channel_posts()`](https://greengrassblueocean.github.io/MattermostR/reference/get_channel_posts.md)
   : Get posts from a Mattermost channel
+- [`mm_get_channel_posts()`](https://greengrassblueocean.github.io/MattermostR/reference/mm_get_channel_posts.md)
+  : Get Channel Posts with Extended Webhook and Thread Metadata
+- [`get_post()`](https://greengrassblueocean.github.io/MattermostR/reference/get_post.md)
+  : Retrieve a Single Mattermost Post by ID
+- [`get_post_thread()`](https://greengrassblueocean.github.io/MattermostR/reference/get_post_thread.md)
+  : Retrieve a Mattermost Post Thread by Post ID
 - [`search_posts()`](https://greengrassblueocean.github.io/MattermostR/reference/search_posts.md)
   : Search for posts in Mattermost
 
@@ -169,9 +177,11 @@ Interact with the Mattermost Agents v2.0 plugin for AI completions.
 
 ## Low-level / Developer
 
-Direct API access and server utilities.
+Direct API access, MCP server, and server utilities.
 
 - [`mattermost_api_request()`](https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.md)
   : Make a Mattermost API Request
 - [`check_mattermost_status()`](https://greengrassblueocean.github.io/MattermostR/reference/check_mattermost_status.md)
   : Check if the Mattermost server is online
+- [`run_mcp_stdio()`](https://greengrassblueocean.github.io/MattermostR/reference/run_mcp_stdio.md)
+  : Run the MattermostR MCP Server over stdio

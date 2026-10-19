@@ -16,7 +16,9 @@ send_webhook_message(
   icon_emoji = NULL,
   attachments = NULL,
   props = NULL,
-  priority = NULL
+  priority = NULL,
+  timeout = 10,
+  max_tries = 3
 )
 ```
 
@@ -72,6 +74,15 @@ send_webhook_message(
   Optional. A list specifying message priority (e.g.
   `list(priority = "important")`).
 
+- timeout:
+
+  Numeric. Request timeout in seconds (default `10`).
+
+- max_tries:
+
+  Integer. Maximum number of retry attempts on transient HTTP failures
+  (default `3`).
+
 ## Value
 
 The `httr2` response object, returned invisibly. A successful request
@@ -84,7 +95,7 @@ Console \> Integrations \> Integration Management**). The webhook URL is
 created via **Product menu \> Integrations \> Incoming Webhook** in
 Mattermost.
 
-The request is retried up to 3 times on transient failures.
+The request is retried up to `max_tries` times on transient failures.
 
 ## Examples
 

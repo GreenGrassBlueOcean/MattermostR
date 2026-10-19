@@ -53,6 +53,7 @@ Use the `page` and `per_page` parameters to paginate through results, or use
 <span>  page <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  per_page <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>  since <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include_metadata <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  auth <span class="op">=</span> <span class="fu">get_default_auth</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -80,6 +81,11 @@ When provided, returns all posts created or modified after this time, up to a
 server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page`.</p></dd>
 
 
+<dt id="arg-include-metadata">include_metadata<a class="anchor" aria-label="anchor" href="#arg-include-metadata"></a></dt>
+<dd><p>Boolean. If `TRUE`, appends `root_id`, `override_username`,
+and `from_webhook` columns extracted from post metadata. Default is `FALSE`.</p></dd>
+
+
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Boolean. If `TRUE`, the function will print request/response details for more information.</p></dd>
 
@@ -92,7 +98,8 @@ server-side limit of 1000 posts. **Cannot** be combined with `page` or `per_page
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame of posts from the channel with columns `id`, `create_at`,
   `update_at`, `edit_at`, `delete_at`, `is_pinned`, `user_id`, `channel_id`,
-  `message`, and `type`. Returns an empty data frame if no posts are found.</p>
+  `message`, and `type` (plus `root_id`, `override_username`, and `from_webhook`
+  when `include_metadata = TRUE`). Returns an empty data frame if no posts are found.</p>
 <p>A warning is issued when the number of returned posts equals `per_page`,
   indicating that additional pages may be available.</p>
     </div>

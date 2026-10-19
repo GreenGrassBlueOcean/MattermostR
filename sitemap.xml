@@ -42,6 +42,8 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_command.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_mattermost_file.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_me.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_post.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_post_thread.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_reactions.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_team.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/get_team_channels.html</loc></url>
@@ -53,11 +55,14 @@
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/list_agents.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/list_commands.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/mattermost_api_request.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/mm_get_channel_posts.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/mm_send_webhook.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/pin_post.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/print.mattermost_auth.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/regen_command_token.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/remove_channel_member.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/remove_reaction.html</loc></url>
+<url><loc>https://greengrassblueocean.github.io/MattermostR/reference/run_mcp_stdio.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/search_posts.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/send_mattermost_message.html</loc></url>
 <url><loc>https://greengrassblueocean.github.io/MattermostR/reference/send_webhook_message.html</loc></url>
