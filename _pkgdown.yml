@@ -21,6 +21,7 @@ reference:
     contents:
       - send_mattermost_message
       - send_webhook_message
+      - mm_send_webhook
       - update_post
       - delete_post
       - delete_old_messages
@@ -29,6 +30,9 @@ reference:
     desc: Retrieve and search posts in channels.
     contents:
       - get_channel_posts
+      - mm_get_channel_posts
+      - get_post
+      - get_post_thread
       - search_posts
 
   - title: Reactions & Pins
@@ -109,7 +113,8 @@ reference:
       - get_agents_plugin_id
 
   - title: Low-level / Developer
-    desc: Direct API access and server utilities.
+    desc: Direct API access, MCP server, and server utilities.
     contents:
       - mattermost_api_request
       - check_mattermost_status
+      - run_mcp_stdio
