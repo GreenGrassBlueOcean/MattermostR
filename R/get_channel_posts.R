@@ -217,6 +217,29 @@ convert_mattermost_posts_to_dataframe <- function(nested_list, include_extended 
 
   # Loop through each post and extract relevant fields
   for (post in posts) {
+    msg_text <- if (!is.null(post$message)) as.character(post$message) else ""
+    if (!nzchar(trimws(msg_text)) && !is.null(post$props) &&
+        !is.null(post$props$attachments) && length(post$props$attachments) > 0L) {
+      att_parts <- vapply(post$props$attachments, function(att) {
+        if (!is.list(att)) return("")
+        pieces <- character(0)
+        if (!is.null(att$title) && nzchar(as.character(att$title))) {
+          pieces <- c(pieces, as.character(att$title))
+        }
+        if (!is.null(att$text) && nzchar(as.character(att$text))) {
+          pieces <- c(pieces, as.character(att$text))
+        }
+        if (length(pieces) == 0L && !is.null(att$fallback) && nzchar(as.character(att$fallback))) {
+          pieces <- c(pieces, as.character(att$fallback))
+        }
+        paste(pieces, collapse = "\n")
+      }, character(1L))
+      att_parts <- att_parts[nzchar(att_parts)]
+      if (length(att_parts) > 0L) {
+        msg_text <- paste(att_parts, collapse = "\n")
+      }
+    }
+
     row_df <- data.frame(
       id = post$id,
       create_at = if (post$create_at != 0) { as.POSIXct(post$create_at / 1000, origin = "1970-01-01", tz = "UTC") } else { NA },
@@ -226,7 +249,7 @@ convert_mattermost_posts_to_dataframe <- function(nested_list, include_extended 
       is_pinned = post$is_pinned,
       user_id = post$user_id,
       channel_id = post$channel_id,
-      message = post$message,
+      message = msg_text,
       type = post$type,
       stringsAsFactors = FALSE
     )
