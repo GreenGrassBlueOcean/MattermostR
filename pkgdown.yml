@@ -1,9 +1,9 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   ai-agents: ai-agents.html
-last_built: 2026-06-08T19:04Z
+last_built: 2026-10-19T18:59Z
 urls:
   reference: https://greengrassblueocean.github.io/MattermostR/reference
   article: https://greengrassblueocean.github.io/MattermostR/articles
